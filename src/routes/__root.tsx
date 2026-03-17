@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { TooltipProvider } from '#/components/ui/tooltip'
 import '../styles.css'
 
 export const Route = createRootRoute({
@@ -22,7 +23,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-primary antialiased wrap-anywhere">
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
         {import.meta.env.DEV && (
           <TanStackDevtools
             config={{ position: 'bottom-right' }}
