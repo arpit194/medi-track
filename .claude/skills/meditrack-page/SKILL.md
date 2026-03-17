@@ -8,17 +8,18 @@ argument-hint: <route path, e.g. /_app/reports/upload>
 
 ## Step 1 — Choose the Right Layout Group
 
-| Route type | Layout group | File prefix |
-|---|---|---|
-| Unauthenticated (login, signup, password) | `_auth` | `src/routes/_auth/` |
-| Authenticated app pages | `_app` | `src/routes/_app/` |
-| Public token-based view | `s/` | `src/routes/s/` |
+| Route type                                | Layout group | File prefix         |
+| ----------------------------------------- | ------------ | ------------------- |
+| Unauthenticated (login, signup, password) | `_auth`      | `src/routes/_auth/` |
+| Authenticated app pages                   | `_app`       | `src/routes/_app/`  |
+| Public token-based view                   | `s/`         | `src/routes/s/`     |
 
 ## Step 2 — Create the Route File (thin wrapper only)
 
-Route files are under ~30 lines. They register the route and import the page component — nothing else.
+Route files are under ~30 lines. They register the route and import the page component — nothing else
 
 ### `_app` page
+
 ```typescript
 // src/routes/_app/dashboard.tsx
 import { createFileRoute } from '@tanstack/react-router'
@@ -30,6 +31,7 @@ export const Route = createFileRoute('/_app/dashboard')({
 ```
 
 ### `_app` nested page
+
 ```typescript
 // src/routes/_app/reports/upload.tsx
 import { createFileRoute } from '@tanstack/react-router'
@@ -41,6 +43,7 @@ export const Route = createFileRoute('/_app/reports/upload')({
 ```
 
 ### `_app` dynamic segment
+
 ```typescript
 // src/routes/_app/reports/$id/index.tsx
 import { createFileRoute } from '@tanstack/react-router'
@@ -52,6 +55,7 @@ export const Route = createFileRoute('/_app/reports/$id/')({
 ```
 
 ### `_auth` page
+
 ```typescript
 // src/routes/_auth/login.tsx
 import { createFileRoute } from '@tanstack/react-router'
@@ -66,22 +70,23 @@ export const Route = createFileRoute('/_auth/login')({
 
 Component lives in the folder mirroring the route path.
 
-| Route | Component path |
-|---|---|
-| `/_app/dashboard` | `src/components/app/dashboard/DashboardPage.tsx` |
-| `/_app/reports` | `src/components/app/reports/ReportsPage.tsx` |
-| `/_app/reports/upload` | `src/components/app/reports/UploadReportPage.tsx` |
-| `/_app/reports/$id` | `src/components/app/reports/ReportDetailPage.tsx` |
-| `/_app/reports/$id/edit` | `src/components/app/reports/EditReportPage.tsx` |
-| `/_app/timeline` | `src/components/app/timeline/TimelinePage.tsx` |
-| `/_app/share` | `src/components/app/share/ShareLinksPage.tsx` |
-| `/_app/share/new` | `src/components/app/share/CreateShareLinkPage.tsx` |
-| `/_app/settings` | `src/components/app/settings/SettingsPage.tsx` |
-| `/_auth/login` | `src/components/auth/LoginPage.tsx` |
-| `/_auth/signup` | `src/components/auth/SignupPage.tsx` |
-| `/s/$token` | `src/components/shared/SharedReportPage.tsx` |
+| Route                    | Component path                                     |
+| ------------------------ | -------------------------------------------------- |
+| `/_app/dashboard`        | `src/components/app/dashboard/DashboardPage.tsx`   |
+| `/_app/reports`          | `src/components/app/reports/ReportsPage.tsx`       |
+| `/_app/reports/upload`   | `src/components/app/reports/UploadReportPage.tsx`  |
+| `/_app/reports/$id`      | `src/components/app/reports/ReportDetailPage.tsx`  |
+| `/_app/reports/$id/edit` | `src/components/app/reports/EditReportPage.tsx`    |
+| `/_app/timeline`         | `src/components/app/timeline/TimelinePage.tsx`     |
+| `/_app/share`            | `src/components/app/share/ShareLinksPage.tsx`      |
+| `/_app/share/new`        | `src/components/app/share/CreateShareLinkPage.tsx` |
+| `/_app/settings`         | `src/components/app/settings/SettingsPage.tsx`     |
+| `/_auth/login`           | `src/components/auth/LoginPage.tsx`                |
+| `/_auth/signup`          | `src/components/auth/SignupPage.tsx`               |
+| `/s/$token`              | `src/components/shared/SharedReportPage.tsx`       |
 
 ### Minimal page component shell
+
 ```typescript
 export function DashboardPage() {
   return (
@@ -93,6 +98,7 @@ export function DashboardPage() {
 ```
 
 ### Loading skeleton variant (create alongside the page)
+
 ```typescript
 import { Skeleton } from '#/components/ui/skeleton'
 
@@ -109,13 +115,13 @@ export function DashboardPageSkeleton() {
 
 ## Step 4 — Naming Conventions
 
-| Thing | Convention |
-|---|---|
-| Route file | `kebab-case.tsx` |
-| Dynamic segment | `$paramName` (e.g. `$id`, `$token`) |
-| Page component | `PascalCase` + `Page` suffix (e.g. `DashboardPage`) |
-| Skeleton variant | Same name + `Skeleton` suffix |
-| Component folder | lowercase, matches route segment |
+| Thing            | Convention                                          |
+| ---------------- | --------------------------------------------------- |
+| Route file       | `kebab-case.tsx`                                    |
+| Dynamic segment  | `$paramName` (e.g. `$id`, `$token`)                 |
+| Page component   | `PascalCase` + `Page` suffix (e.g. `DashboardPage`) |
+| Skeleton variant | Same name + `Skeleton` suffix                       |
+| Component folder | lowercase, matches route segment                    |
 
 ## Step 5 — Internal Navigation
 

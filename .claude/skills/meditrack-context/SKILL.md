@@ -7,24 +7,25 @@ description: Master context for MediTrack — app overview, route map, data mode
 
 ## What is MediTrack?
 
-MediTrack is a patient-facing app for digitally managing medical reports — replacing physical folders of paper hard copies. Users are non-tech-savvy patients of all ages, including elderly people. Every decision prioritises clarity, trust, forgiveness (no accidental irreversible actions), and mobile-first usability.
+MediTrack is a patient facing app for digitally managing medical reports — replacing physical folders of paper hard copies. Users are non-tech-savvy patients of all ages, including elderly people. Every decision prioritises clarity, trust, forgiveness (no accidental irreversible actions), and mobile-first usability.
 
 POC scope: auth, upload reports, timeline view, shareable links.
 
 ## Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | TanStack Start + TanStack Router (file-based routing) |
-| UI | React 19 |
-| Styling | Tailwind CSS v4 |
+| Layer      | Choice                                                   |
+| ---------- | -------------------------------------------------------- |
+| Framework  | TanStack Start + TanStack Router (file-based routing)    |
+| UI         | React 19                                                 |
+| Styling    | Tailwind CSS v4                                          |
 | Components | shadcn v4, `base-nova` style (built on `@base-ui/react`) |
-| Language | TypeScript strict mode |
-| Icons | `lucide-react` |
-| Dates | `date-fns` |
-| Path alias | `#/` maps to `src/` |
+| Language   | TypeScript strict mode                                   |
+| Icons      | `lucide-react`                                           |
+| Dates      | `date-fns`                                               |
+| Path alias | `#/` maps to `src/`                                      |
 
 Key imports:
+
 - `#/components/ui/*` — shadcn components (never edit these files)
 - `#/lib/utils` — `cn()` utility (clsx + tailwind-merge)
 - `#/hooks/use-mobile` — mobile breakpoint hook
@@ -95,8 +96,8 @@ type User = {
   id: string
   name: string
   email: string
-  dob: string        // ISO date
-  bloodType: string  // e.g. "A+", "O-"
+  dob: string // ISO date
+  bloodType: string // e.g. "A+", "O-"
   gender: string
   createdAt: string
 }
@@ -108,10 +109,10 @@ type Report = {
   userId: string
   type: ReportType
   title: string
-  date: string       // ISO date — the report date, not upload date
+  date: string // ISO date — the report date, not upload date
   doctorName: string
   notes: string
-  files: string[]    // file URLs
+  files: string[] // file URLs
   createdAt: string
 }
 
@@ -131,18 +132,18 @@ type ShareLink = {
 
 Always use semantic tokens — never raw colour classes like `bg-teal-500`.
 
-| Token | Use |
-|---|---|
-| `bg-background` / `text-foreground` | Page base |
-| `bg-card` / `text-card-foreground` | Elevated surfaces |
-| `bg-primary` / `text-primary-foreground` | Teal/green — primary actions only |
-| `bg-muted` / `text-muted-foreground` | Disabled, helper, secondary text |
-| `bg-accent` / `text-accent-foreground` | Hover/focus highlight surface |
-| `bg-destructive` | Errors, deletes, irreversible only |
-| `bg-sidebar` / `text-sidebar-foreground` | Sidebar surface |
-| `border-border` | Default border |
-| `border-input` | Form input border |
-| `chart-1` → `chart-5` | Teal-family gradient, data viz only |
+| Token                                    | Use                                 |
+| ---------------------------------------- | ----------------------------------- |
+| `bg-background` / `text-foreground`      | Page base                           |
+| `bg-card` / `text-card-foreground`       | Elevated surfaces                   |
+| `bg-primary` / `text-primary-foreground` | Teal/green — primary actions only   |
+| `bg-muted` / `text-muted-foreground`     | Disabled, helper, secondary text    |
+| `bg-accent` / `text-accent-foreground`   | Hover/focus highlight surface       |
+| `bg-destructive`                         | Errors, deletes, irreversible only  |
+| `bg-sidebar` / `text-sidebar-foreground` | Sidebar surface                     |
+| `border-border`                          | Default border                      |
+| `border-input`                           | Form input border                   |
+| `chart-1` → `chart-5`                    | Teal-family gradient, data viz only |
 
 ## Typography
 

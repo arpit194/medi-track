@@ -137,6 +137,8 @@ A short clarifying question is always better than building the wrong thing confi
 - Always load `/meditrack-context` at the start of any MediTrack task
 - Use `/meditrack-page` when scaffolding a new route
 - Use `/meditrack-component` when building new UI components
+- Use `/meditrack-routes` to get the full route map and URL patterns
+- Use `/meditrack-theme` when referencing colour tokens, typography, spacing, or dark mode rules
 
 ## Reminders
 - If I correct Claude on something worth keeping, prompt me to add it here.

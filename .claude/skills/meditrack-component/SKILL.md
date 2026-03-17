@@ -8,7 +8,8 @@ argument-hint: <component name or feature>
 
 ## Core Principles
 
-Users are patients — often elderly, often anxious about their medical data. Components must:
+Users are patients — often time elderly, often anxious about their medical data. Components must:
+
 - Communicate state clearly without relying on colour alone (pair with text or icon)
 - Give enough breathing room to reduce cognitive load
 - Never show blank areas while loading — always use Skeleton
@@ -20,20 +21,20 @@ Never edit files in `ui/`. Import from `#/components/ui/<name>`.
 
 Key components for MediTrack:
 
-| Component | File | Use |
-|---|---|---|
-| `Button` | `button.tsx` | All interactive triggers |
-| `Card`, `CardHeader`, `CardContent`, `CardFooter`, `CardTitle`, `CardDescription`, `CardAction` | `card.tsx` | Content surfaces |
-| `Badge` | `badge.tsx` | Report type labels, status chips |
-| `Skeleton` | `skeleton.tsx` | Loading states |
-| `Empty`, `EmptyHeader`, `EmptyTitle`, `EmptyDescription`, `EmptyContent`, `EmptyMedia` | `empty.tsx` | Empty states |
-| `AlertDialog` + sub-components | `alert-dialog.tsx` | Destructive confirmations (delete, revoke) |
-| `Dialog` + sub-components | `dialog.tsx` | Non-destructive modals |
-| `Separator` | `separator.tsx` | Visual dividers |
-| `Tooltip`, `TooltipTrigger`, `TooltipContent` | `tooltip.tsx` | Icon button labels |
-| `Avatar`, `AvatarImage`, `AvatarFallback` | `avatar.tsx` | User profile images |
-| `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` | `tabs.tsx` | Section switching |
-| `ScrollArea` | `scroll-area.tsx` | Constrained scrollable regions |
+| Component                                                                                       | File               | Use                                        |
+| ----------------------------------------------------------------------------------------------- | ------------------ | ------------------------------------------ |
+| `Button`                                                                                        | `button.tsx`       | All interactive triggers                   |
+| `Card`, `CardHeader`, `CardContent`, `CardFooter`, `CardTitle`, `CardDescription`, `CardAction` | `card.tsx`         | Content surfaces                           |
+| `Badge`                                                                                         | `badge.tsx`        | Report type labels, status chips           |
+| `Skeleton`                                                                                      | `skeleton.tsx`     | Loading states                             |
+| `Empty`, `EmptyHeader`, `EmptyTitle`, `EmptyDescription`, `EmptyContent`, `EmptyMedia`          | `empty.tsx`        | Empty states                               |
+| `AlertDialog` + sub-components                                                                  | `alert-dialog.tsx` | Destructive confirmations (delete, revoke) |
+| `Dialog` + sub-components                                                                       | `dialog.tsx`       | Non-destructive modals                     |
+| `Separator`                                                                                     | `separator.tsx`    | Visual dividers                            |
+| `Tooltip`, `TooltipTrigger`, `TooltipContent`                                                   | `tooltip.tsx`      | Icon button labels                         |
+| `Avatar`, `AvatarImage`, `AvatarFallback`                                                       | `avatar.tsx`       | User profile images                        |
+| `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`                                                | `tabs.tsx`         | Section switching                          |
+| `ScrollArea`                                                                                    | `scroll-area.tsx`  | Constrained scrollable regions             |
 
 ## Colour Token Rules
 
@@ -49,6 +50,7 @@ Never use raw Tailwind colour utilities (`bg-teal-500`, `text-gray-600`). Semant
 ```
 
 Quick reference:
+
 - **Page base**: `bg-background text-foreground`
 - **Raised surface**: `bg-card text-card-foreground`
 - **Subtle/muted**: `bg-muted text-muted-foreground`
@@ -184,6 +186,7 @@ function NoReportsEmpty() {
 ```
 
 Rules:
+
 - Title states what is missing (not "Nothing here")
 - Description is warm and explains what to do — no jargon, no apology
 - Always include a clear action if there's a way to fill the empty state
@@ -297,7 +300,7 @@ import { Input } from '#/components/ui/input'
       id="doctor-name"
       name="doctorName"
       type="text"
-      placeholder="e.g. Dr. Priya Sharma"
+      placeholder="e.g. Name"
       aria-invalid={!!errors.doctorName}
       aria-describedby={errors.doctorName ? 'doctor-name-error' : undefined}
     />
@@ -388,12 +391,12 @@ import { RadioGroup, RadioGroupItem } from '#/components/ui/radio-group'
 
 ### Error Message Writing Rules
 
-| Bad | Good |
-|---|---|
-| "Required" | "Please enter the doctor's name" |
-| "Invalid date" | "Please enter the date shown on the report" |
-| "Invalid email" | "Please enter a valid email address, like name@example.com" |
-| "File too large" | "This file is too large. Please upload a file under 10 MB." |
+| Bad              | Good                                                                        |
+| ---------------- | --------------------------------------------------------------------------- |
+| "Required"       | "Please enter the doctor's name"                                            |
+| "Invalid date"   | "Please enter the date shown on the report"                                 |
+| "Invalid email"  | "Please enter a valid email address, like name@example.com"                 |
+| "File too large" | "This file is too large. Please upload a file under 10 MB."                 |
 | "Error occurred" | "We couldn't save your report. Please check your connection and try again." |
 
 Tone: calm, specific, actionable. Never blame the user.
@@ -426,11 +429,11 @@ Tone: calm, specific, actionable. Never blame the user.
 
 ### Inline Error vs Toast
 
-| Situation | Use |
-|---|---|
-| Field validation failed | `FieldError` inline beneath the field |
+| Situation               | Use                                                   |
+| ----------------------- | ----------------------------------------------------- |
+| Field validation failed | `FieldError` inline beneath the field                 |
 | Whole-form server error | `Alert variant="destructive"` above the submit button |
-| Action succeeded | `toast.success()` from `sonner` |
+| Action succeeded        | `toast.success()` from `sonner`                       |
 
 Never use `toast.error()` as the only feedback for a form submission — users need inline errors to know what to fix.
 
