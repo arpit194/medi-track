@@ -90,21 +90,23 @@ Component lives in the folder mirroring the route path.
 ```typescript
 export function DashboardPage() {
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-4xl mx-auto">
       {/* sections */}
     </div>
   )
 }
 ```
 
-### Loading skeleton variant (create alongside the page)
+### Loading skeleton variant (only when the page loads async data)
+
+Create a skeleton only if the page has a route `loader` or fires queries that need to resolve before content appears. Pure form pages (auth, onboarding) do not need skeletons.
 
 ```typescript
 import { Skeleton } from '#/components/ui/skeleton'
 
 export function DashboardPageSkeleton() {
   return (
-    <div className="flex flex-col gap-4 p-4 md:p-6 max-w-4xl mx-auto">
+    <div className="flex flex-1 flex-col gap-4 p-4 md:p-6 w-full max-w-4xl mx-auto">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-32 w-full" />
       <Skeleton className="h-32 w-full" />
@@ -141,7 +143,8 @@ navigate({ to: '/reports', search: { filter: 'blood_test' } })
 
 ## Step 6 — Page Layout Rules
 
-- Max width: `max-w-4xl` or `max-w-5xl`, centred with `mx-auto`
+- Outer div: always `flex flex-1 flex-col w-full` — this ensures the page fills the flex container and child empty states can grow vertically
+- Max width: `max-w-4xl` or `max-w-2xl` for forms, centred with `mx-auto`
 - Padding: `p-4 md:p-6` (mobile-first)
 - Vertical spacing between sections: `gap-6`
 - Cards use minimum `p-6` internal padding via `CardContent`
@@ -152,6 +155,6 @@ navigate({ to: '/reports', search: { filter: 'blood_test' } })
 - [ ] Route file is under ~30 lines with no inline JSX
 - [ ] `createFileRoute` string exactly matches the file path
 - [ ] Page component is in the correct `src/components/` subfolder
-- [ ] Skeleton variant exists alongside the page component
+- [ ] Skeleton variant exists alongside the page component (only if it loads async data)
 - [ ] All internal links use `<Link>` from TanStack Router
 - [ ] Page has `max-w-*`, `mx-auto`, and correct padding

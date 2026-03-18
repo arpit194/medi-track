@@ -1,7 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ReportDetailPage } from '#/components/app/reports/ReportDetailPage'
 
-export const Route = createFileRoute('/_app/reports/$id/')({ component: ReportDetailPage })
+export const Route = createFileRoute('/_app/reports/$id/')({
+  component: RouteComponent,
+})
 
-function ReportDetailPage() {
-  return <div>Report Detail</div>
+function RouteComponent() {
+  const { id } = Route.useParams()
+  return <ReportDetailPage id={id} />
 }

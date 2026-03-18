@@ -58,6 +58,41 @@ Quick reference:
 - **Danger**: use `variant="destructive"` on Button/Badge — don't add `bg-destructive` manually
 - **Borders**: `border-border` (default), `border-input` (form fields)
 
+## Base UI Composition — no asChild, two patterns
+
+All UI components are built on **Base UI**, not Radix. `asChild` does not exist.
+
+### Navigation links styled as buttons — use `buttonVariants` on `Link`
+
+Base UI's `Button` has `nativeButton: true` by default and expects its rendered element to be a `<button>`. A `Link` renders an `<a>`, so wrapping it in `Button` triggers a warning and removes semantics. Instead, apply `buttonVariants` directly to the `Link`:
+
+```typescript
+import { Link } from '@tanstack/react-router'
+import { buttonVariants } from '#/components/ui/button'
+import { cn } from '#/lib/utils'
+
+// ❌ Wrong — Link renders <a>, Button expects <button>
+<Button render={<Link to="/dashboard" />}>Go</Button>
+
+// ✅ Correct — style the Link directly, no Button wrapper
+<Link to="/dashboard" className={cn(buttonVariants({ size: 'lg' }), 'w-full')}>
+  Go to my records
+</Link>
+```
+
+### Triggers wrapping a Button — use `render` prop
+
+Trigger components (`AlertDialogTrigger`, `DialogTrigger`, `PopoverTrigger`) do accept `render` because Button still renders a native `<button>`:
+
+```typescript
+// ✅ Fine — Button renders <button>, satisfies nativeButton requirement
+<AlertDialogTrigger render={<Button variant="destructive" size="sm" />}>
+  Delete
+</AlertDialogTrigger>
+```
+
+**Rule of thumb:** `Button render={<X />}` is only valid when `X` renders a `<button>`. For anything that renders an `<a>` or other element, use `buttonVariants` directly on that element instead.
+
 ## Button Conventions
 
 ```typescript
@@ -176,9 +211,9 @@ function NoReportsEmpty() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button asChild>
-          <Link to="/reports/upload">Upload your first report</Link>
-        </Button>
+        <Link to="/reports/upload" className={buttonVariants()}>
+          Upload your first report
+        </Link>
       </EmptyContent>
     </Empty>
   )
@@ -259,8 +294,8 @@ import { Button } from '#/components/ui/button'
 function DeleteReportButton({ onConfirm }: { onConfirm: () => void }) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">Delete report</Button>
+      <AlertDialogTrigger render={<Button variant="destructive" size="sm" />}>
+        Delete report
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

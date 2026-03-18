@@ -1,27 +1,30 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
-import { signupSchema } from '#/lib/auth-schemas'
+import { onboardingProfileSchema } from '#/lib/onboarding-schemas'
 import { getErrorMessage } from '#/api/client'
-import { useSignupMutation } from '#/hooks/auth'
+import { useUpdateProfileMutation } from '#/hooks/user'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field'
-import { Input } from '#/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '#/components/ui/native-select'
+import { DatePicker } from '#/components/shared/DatePicker'
 
-export function SignupForm() {
+const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
+export function OnboardingProfileForm() {
   const navigate = useNavigate()
-  const signupMutation = useSignupMutation()
+  const updateProfile = useUpdateProfileMutation()
 
   const form = useForm({
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
-    validators: { onChange: signupSchema },
+    defaultValues: { dob: '', bloodType: '', gender: '' },
+    validators: { onChange: onboardingProfileSchema },
     onSubmit: async ({ value }) => {
       try {
-        await signupMutation.mutateAsync(value)
-        await navigate({ to: '/onboarding/profile' })
+        await updateProfile.mutateAsync(value)
+        await navigate({ to: '/onboarding/first-upload' })
       } catch {
-        // error displayed via signupMutation.isError
+        // error displayed via updateProfile.isError
       }
     },
   })
@@ -36,40 +39,36 @@ export function SignupForm() {
       }}
       noValidate
     >
-      {signupMutation.isError && (
+      {updateProfile.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
           <AlertTitle>Something went wrong</AlertTitle>
-          <AlertDescription>
-            {getErrorMessage(signupMutation.error)}
-          </AlertDescription>
+          <AlertDescription>{getErrorMessage(updateProfile.error)}</AlertDescription>
         </Alert>
       )}
 
       <FieldGroup>
-        <form.Field name="name">
+        <form.Field name="dob">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Full name</FieldLabel>
-              <Input
+              <FieldLabel htmlFor={field.name}>Date of birth</FieldLabel>
+              <DatePicker
                 id={field.name}
-                type="text"
                 value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
+                onChange={(value) => field.handleChange(value)}
                 onBlur={field.handleBlur}
-                placeholder="e.g. Saloni Patidar"
-                autoComplete="name"
-                className="h-11"
+                placeholder="Select your date of birth"
+                disableFuture
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 aria-describedby={
                   field.state.meta.isTouched && field.state.meta.errors.length > 0
-                    ? 'name-error'
+                    ? 'dob-error'
                     : undefined
                 }
               />
               {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
                 <FieldError
-                  id="name-error"
+                  id="dob-error"
                   errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
                 />
               )}
@@ -77,29 +76,35 @@ export function SignupForm() {
           )}
         </form.Field>
 
-        <form.Field name="email">
+        <form.Field name="bloodType">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Email address</FieldLabel>
-              <Input
+              <FieldLabel htmlFor={field.name}>Blood type</FieldLabel>
+              <NativeSelect
                 id={field.name}
-                type="email"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="you@example.com"
-                autoComplete="email"
-                className="h-11"
+                className="w-full [&_select]:h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 aria-describedby={
                   field.state.meta.isTouched && field.state.meta.errors.length > 0
-                    ? 'email-error'
+                    ? 'bloodType-error'
                     : undefined
                 }
-              />
+              >
+                <NativeSelectOption value="" disabled>
+                  Select blood type
+                </NativeSelectOption>
+                {BLOOD_TYPES.map((bt) => (
+                  <NativeSelectOption key={bt} value={bt}>
+                    {bt}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
               {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
                 <FieldError
-                  id="email-error"
+                  id="bloodType-error"
                   errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
                 />
               )}
@@ -107,59 +112,34 @@ export function SignupForm() {
           )}
         </form.Field>
 
-        <form.Field name="password">
+        <form.Field name="gender">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-              <Input
+              <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
+              <NativeSelect
                 id={field.name}
-                type="password"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="At least 8 characters"
-                autoComplete="new-password"
-                className="h-11"
+                className="w-full [&_select]:h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 aria-describedby={
                   field.state.meta.isTouched && field.state.meta.errors.length > 0
-                    ? 'password-error'
+                    ? 'gender-error'
                     : undefined
                 }
-              />
+              >
+                <NativeSelectOption value="" disabled>
+                  Select gender
+                </NativeSelectOption>
+                <NativeSelectOption value="male">Male</NativeSelectOption>
+                <NativeSelectOption value="female">Female</NativeSelectOption>
+                <NativeSelectOption value="other">Other</NativeSelectOption>
+                <NativeSelectOption value="prefer_not_to_say">Prefer not to say</NativeSelectOption>
+              </NativeSelect>
               {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
                 <FieldError
-                  id="password-error"
-                  errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
-                />
-              )}
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="confirmPassword">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
-              <Input
-                id={field.name}
-                type="password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                placeholder="Re-enter your password"
-                autoComplete="new-password"
-                className="h-11"
-                aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                aria-describedby={
-                  field.state.meta.isTouched && field.state.meta.errors.length > 0
-                    ? 'confirm-password-error'
-                    : undefined
-                }
-              />
-              {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-                <FieldError
-                  id="confirm-password-error"
+                  id="gender-error"
                   errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
                 />
               )}
@@ -176,7 +156,7 @@ export function SignupForm() {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Creating account…' : 'Create account'}
+            {isSubmitting ? 'Saving…' : 'Continue'}
           </Button>
         )}
       </form.Subscribe>

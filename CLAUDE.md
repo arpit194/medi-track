@@ -101,6 +101,17 @@ Tokens are defined in `src/styles.css`. Use semantic tokens, never raw colours:
 - Empty states are encouraging and tell the user exactly what to do next
 - Labels and instructions should be self-explanatory — assume no prior app experience
 
+## UI Library
+- Components are built on **Base UI** (`@base-ui/react`), not Radix UI — `asChild` does not exist
+- **Navigation links styled as buttons:** use `buttonVariants` directly on `<Link>` — never wrap `Link` in `Button` (Base UI Button expects a native `<button>`, `Link` renders `<a>`)
+  ```tsx
+  <Link to="/x" className={cn(buttonVariants({ size: 'lg' }), 'w-full')}>Label</Link>
+  ```
+- **Triggers that should look like buttons:** use the `render` prop — this is fine because `Button` still renders a `<button>`
+  ```tsx
+  <AlertDialogTrigger render={<Button variant="destructive" />}>Delete</AlertDialogTrigger>
+  ```
+
 ## Code Quality
 - No comments unless the logic is genuinely non-obvious
 - No `any` types — use proper TypeScript types always
@@ -134,12 +145,19 @@ Always check how similar problems are already solved in the codebase before intr
 A short clarifying question is always better than building the wrong thing confidently.
 
 ## Skills
-- Always load `/meditrack-context` at the start of any MediTrack task
-- Use `/meditrack-page` when scaffolding a new route
-- Use `/meditrack-component` when building new UI components
-- Use `/meditrack-routes` to get the full route map and URL patterns
-- Use `/meditrack-theme` when referencing colour tokens, typography, spacing, or dark mode rules
-- Use `/meditrack-form` when building any form — schemas, field pattern, validation, server errors
+
+**IMPORTANT: You MUST invoke the relevant skill(s) via the Skill tool BEFORE writing any code. Do not write a single line of implementation until the required skills have been loaded. This is non-negotiable.**
+
+| Trigger | Skill to load first |
+|---|---|
+| Any MediTrack task | `/meditrack-context` |
+| Scaffolding a new route/page | `/meditrack-page` |
+| Building any UI component | `/meditrack-component` |
+| Reading routes or URLs | `/meditrack-routes` |
+| Referencing colours, tokens, typography, spacing | `/meditrack-theme` |
+| Building any form | `/meditrack-form` |
+
+Multiple skills may apply — load all of them before starting.
 
 ## Reminders
 - If I correct Claude on something worth keeping, prompt me to add it here.
