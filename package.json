@@ -3,15 +3,21 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --filter @medi-track/web dev",
+    "dev:api": "pnpm --filter @medi-track/api dev",
     "build": "pnpm --filter @medi-track/web build",
+    "build:api": "pnpm --filter @medi-track/api build",
     "lint": "pnpm --filter @medi-track/web lint",
     "format": "prettier --check ."
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
       "esbuild",
       "lightningcss",
       "msw",
+      "prisma",
       "unrs-resolver"
     ]
   }
