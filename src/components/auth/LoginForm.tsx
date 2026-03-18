@@ -1,27 +1,27 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
-import { signupSchema } from '#/lib/auth-schemas'
+import { loginSchema } from '#/lib/auth-schemas'
 import { getErrorMessage } from '#/api/client'
-import { useSignupMutation } from '#/hooks/auth'
+import { useLoginMutation } from '#/hooks/auth'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field'
 import { Input } from '#/components/ui/input'
 
-export function SignupForm() {
+export function LoginForm() {
   const navigate = useNavigate()
-  const signupMutation = useSignupMutation()
+  const loginMutation = useLoginMutation()
 
   const form = useForm({
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
-    validators: { onChange: signupSchema },
+    defaultValues: { email: '', password: '' },
+    validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
       try {
-        await signupMutation.mutateAsync(value)
+        await loginMutation.mutateAsync(value)
         await navigate({ to: '/dashboard' })
       } catch {
-        // error displayed via signupMutation.isError
+        // error displayed via loginMutation.isError
       }
     },
   })
@@ -36,47 +36,17 @@ export function SignupForm() {
       }}
       noValidate
     >
-      {signupMutation.isError && (
+      {loginMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
           <AlertTitle>Something went wrong</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(signupMutation.error)}
+            {getErrorMessage(loginMutation.error)}
           </AlertDescription>
         </Alert>
       )}
 
       <FieldGroup>
-        <form.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>Full name</FieldLabel>
-              <Input
-                id={field.name}
-                type="text"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                placeholder="e.g. Saloni Patidar"
-                autoComplete="name"
-                className="h-11"
-                aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                aria-describedby={
-                  field.state.meta.isTouched && field.state.meta.errors.length > 0
-                    ? 'name-error'
-                    : undefined
-                }
-              />
-              {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-                <FieldError
-                  id="name-error"
-                  errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
-                />
-              )}
-            </Field>
-          )}
-        </form.Field>
-
         <form.Field name="email">
           {(field) => (
             <Field>
@@ -117,8 +87,8 @@ export function SignupForm() {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="At least 8 characters"
-                autoComplete="new-password"
+                placeholder="Your password"
+                autoComplete="current-password"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 aria-describedby={
@@ -136,36 +106,6 @@ export function SignupForm() {
             </Field>
           )}
         </form.Field>
-
-        <form.Field name="confirmPassword">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
-              <Input
-                id={field.name}
-                type="password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                placeholder="Re-enter your password"
-                autoComplete="new-password"
-                className="h-11"
-                aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                aria-describedby={
-                  field.state.meta.isTouched && field.state.meta.errors.length > 0
-                    ? 'confirm-password-error'
-                    : undefined
-                }
-              />
-              {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
-                <FieldError
-                  id="confirm-password-error"
-                  errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
-                />
-              )}
-            </Field>
-          )}
-        </form.Field>
       </FieldGroup>
 
       <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
@@ -176,7 +116,7 @@ export function SignupForm() {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Creating account…' : 'Create account'}
+            {isSubmitting ? 'Signing in…' : 'Sign in'}
           </Button>
         )}
       </form.Subscribe>

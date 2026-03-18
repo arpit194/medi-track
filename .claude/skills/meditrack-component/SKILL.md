@@ -283,195 +283,35 @@ function DeleteReportButton({ onConfirm }: { onConfirm: () => void }) {
 
 ## Forms
 
-Forms are high-stakes for MediTrack users — assume no prior app experience. Every form must be clear, forgiving, and self-explanatory.
+For form state, validation, field template, submit button, and server error patterns — use `/meditrack-form`.
 
-### Core Pattern: Field + Label + Error
-
-Use the `Field` component system from `src/components/ui/field.tsx` for every form field.
-
-```typescript
-import { Field, FieldLabel, FieldDescription, FieldError, FieldGroup } from '#/components/ui/field'
-import { Input } from '#/components/ui/input'
-
-<FieldGroup>
-  <Field>
-    <FieldLabel htmlFor="doctor-name">Doctor's name</FieldLabel>
-    <Input
-      id="doctor-name"
-      name="doctorName"
-      type="text"
-      placeholder="e.g. Name"
-      aria-invalid={!!errors.doctorName}
-      aria-describedby={errors.doctorName ? 'doctor-name-error' : undefined}
-    />
-    <FieldError id="doctor-name-error" errors={[errors.doctorName]} />
-  </Field>
-</FieldGroup>
-```
-
-- Always use a visible `<FieldLabel>` — never placeholder-only labels
-- Always pair `id` on the input with `htmlFor` on the label
-- `aria-invalid` triggers the red ring via the input's `aria-invalid:` Tailwind variant
-- `aria-describedby` links the input to its error for screen readers
-- `FieldError` returns `null` automatically when there is no error — no conditional needed
-- `FieldDescription` adds helper text beneath the label for ambiguous fields
-
-### Select Fields
-
-```typescript
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '#/components/ui/select'
-import { Field, FieldLabel, FieldError } from '#/components/ui/field'
-
-<Field>
-  <FieldLabel htmlFor="report-type">Report type</FieldLabel>
-  <Select name="type" defaultValue="other">
-    <SelectTrigger id="report-type" className="w-full" aria-invalid={!!errors.type}>
-      <SelectValue placeholder="Choose a type" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="blood_test">Blood test</SelectItem>
-      <SelectItem value="xray">X-Ray</SelectItem>
-      <SelectItem value="prescription">Prescription</SelectItem>
-      <SelectItem value="scan">Scan</SelectItem>
-      <SelectItem value="other">Other</SelectItem>
-    </SelectContent>
-  </Select>
-  <FieldError errors={[errors.type]} />
-</Field>
-```
-
-Labels must match user vocabulary — "Blood test" not "blood_test", "X-Ray" not "xray".
-
-### Textarea Fields
-
-```typescript
-import { Textarea } from '#/components/ui/textarea'
-
-<Field>
-  <FieldLabel htmlFor="notes">
-    Notes <span className="text-muted-foreground font-normal">(optional)</span>
-  </FieldLabel>
-  <FieldDescription>Any details you want to remember about this report</FieldDescription>
-  <Textarea id="notes" name="notes" placeholder="e.g. fasting required, follow-up in 3 months" rows={3} />
-  <FieldError errors={[errors.notes]} />
-</Field>
-```
-
-Optional fields must always be labelled "(optional)" — never assume users will guess.
-
-### Radio Groups
-
-```typescript
-import { FieldSet, FieldLegend } from '#/components/ui/field'
-import { RadioGroup, RadioGroupItem } from '#/components/ui/radio-group'
-
-<FieldSet>
-  <FieldLegend>Link expiry</FieldLegend>
-  <RadioGroup name="expiresAt" defaultValue="7d">
-    <Field orientation="horizontal">
-      <RadioGroupItem value="24h" id="expires-24h" />
-      <FieldLabel htmlFor="expires-24h">24 hours</FieldLabel>
-    </Field>
-    <Field orientation="horizontal">
-      <RadioGroupItem value="7d" id="expires-7d" />
-      <FieldLabel htmlFor="expires-7d">7 days</FieldLabel>
-    </Field>
-    <Field orientation="horizontal">
-      <RadioGroupItem value="30d" id="expires-30d" />
-      <FieldLabel htmlFor="expires-30d">30 days</FieldLabel>
-    </Field>
-    <Field orientation="horizontal">
-      <RadioGroupItem value="one_time" id="expires-one-time" />
-      <FieldLabel htmlFor="expires-one-time">One time only</FieldLabel>
-    </Field>
-  </RadioGroup>
-  <FieldError errors={[errors.expiresAt]} />
-</FieldSet>
-```
-
-### Error Message Writing Rules
+### Error message tone
 
 | Bad              | Good                                                                        |
 | ---------------- | --------------------------------------------------------------------------- |
-| "Required"       | "Please enter the doctor's name"                                            |
-| "Invalid date"   | "Please enter the date shown on the report"                                 |
-| "Invalid email"  | "Please enter a valid email address, like name@example.com"                 |
+| "Required"       | "Please enter the doctor's name."                                           |
+| "Invalid date"   | "Please enter the date shown on the report."                                |
+| "Invalid email"  | "Please enter a valid email address, like name@example.com."                |
 | "File too large" | "This file is too large. Please upload a file under 10 MB."                 |
 | "Error occurred" | "We couldn't save your report. Please check your connection and try again." |
 
-Tone: calm, specific, actionable. Never blame the user.
+Calm, specific, actionable — never blame the user.
 
-### Submit Button Pattern
+### Inline error vs toast
 
-```typescript
-// Auth / onboarding — large, full width
-<Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-  {isSubmitting ? 'Signing in…' : 'Sign in'}
-</Button>
+| Situation               | Use                                                     |
+| ----------------------- | ------------------------------------------------------- |
+| Field validation failed | `FieldError` inline beneath the field                   |
+| Whole-form server error | `Alert variant="destructive"` above the fields          |
+| Action succeeded        | `toast.success()` via Sonner                            |
 
-// In-app form
-<Button type="submit" disabled={isSubmitting}>
-  {isSubmitting ? 'Saving…' : 'Save report'}
-</Button>
-
-// With cancel
-<div className="flex gap-3 justify-end">
-  <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-  <Button type="submit" disabled={isSubmitting}>
-    {isSubmitting ? 'Saving…' : 'Save'}
-  </Button>
-</div>
-```
-
-- `size="lg"` + `w-full` only on auth and onboarding forms
-- Show loading text during submission — never just a spinner
-- Disable while submitting to prevent double-submits — never hide the button
-
-### Inline Error vs Toast
-
-| Situation               | Use                                                   |
-| ----------------------- | ----------------------------------------------------- |
-| Field validation failed | `FieldError` inline beneath the field                 |
-| Whole-form server error | `Alert variant="destructive"` above the submit button |
-| Action succeeded        | `toast.success()` from `sonner`                       |
-
-Never use `toast.error()` as the only feedback for a form submission — users need inline errors to know what to fix.
-
-### Form Wrapper
-
-```typescript
-// In-app form — wrap in Card
-<Card>
-  <CardHeader><CardTitle>Upload a report</CardTitle></CardHeader>
-  <CardContent>
-    <form className="flex flex-col gap-5">
-      <FieldGroup>{/* fields */}</FieldGroup>
-    </form>
-  </CardContent>
-  <CardFooter><Button type="submit">Upload</Button></CardFooter>
-</Card>
-
-// Auth page — plain div, no card
-<div className="flex flex-col gap-6 w-full max-w-sm mx-auto">
-  <h1 className="font-serif text-3xl text-center">Welcome back</h1>
-  <form className="flex flex-col gap-5">
-    <FieldGroup>{/* fields */}</FieldGroup>
-    <Button type="submit" size="lg" className="w-full">Sign in</Button>
-  </form>
-</div>
-```
+Never use `toast.error()` as the only feedback for a form submission.
 
 ## Accessibility Checklist
 
 - [ ] Icon-only buttons have `aria-label`
 - [ ] Colour is never the only indicator of state — pair with text or icon
-- [ ] Custom interactive elements: `min-h-11 min-w-11` touch targets
+- [ ] All interactive elements: `min-h-11 min-w-11` minimum touch target
 - [ ] No `text-xs` for anything a user must read to act
-- [ ] Focus rings visible (shadcn components include these — don't override `outline-none`)
-- [ ] Every input has a visible `<FieldLabel>` with matching `htmlFor` / `id`
-- [ ] `aria-invalid="true"` on inputs with errors
-- [ ] `aria-describedby` links input to its `FieldError`
+- [ ] Focus rings visible — don't override `outline-none` on shadcn components
 - [ ] Submit button disabled (not hidden) while submitting
-- [ ] Optional fields labelled "(optional)"
-- [ ] Radio/checkbox groups use `FieldSet` + `FieldLegend`
-- [ ] Input height at least `h-11` on touch-heavy forms

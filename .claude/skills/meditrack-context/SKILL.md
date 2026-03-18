@@ -22,6 +22,7 @@ POC scope: auth, upload reports, timeline view, shareable links.
 | Language   | TypeScript strict mode                                   |
 | Icons      | `lucide-react`                                           |
 | Dates      | `date-fns`                                               |
+| Forms      | `@tanstack/react-form` v1 + `zod` v4 — see `/meditrack-form` |
 | Path alias | `#/` maps to `src/`                                      |
 
 Key imports:

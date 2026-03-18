@@ -139,6 +139,7 @@ A short clarifying question is always better than building the wrong thing confi
 - Use `/meditrack-component` when building new UI components
 - Use `/meditrack-routes` to get the full route map and URL patterns
 - Use `/meditrack-theme` when referencing colour tokens, typography, spacing, or dark mode rules
+- Use `/meditrack-form` when building any form — schemas, field pattern, validation, server errors
 
 ## Reminders
 - If I correct Claude on something worth keeping, prompt me to add it here.
