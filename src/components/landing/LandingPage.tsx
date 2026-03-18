@@ -139,7 +139,7 @@ export function LandingPage() {
           duration: 0.6,
           stagger: 0.12,
           ease: 'power3.out',
-          scrollTrigger: { trigger: '.features-grid', start: 'top 30%' },
+          scrollTrigger: { trigger: '.features-grid', start: 'top 80%' },
         },
       )
 
@@ -153,7 +153,7 @@ export function LandingPage() {
           duration: 0.55,
           stagger: 0.18,
           ease: 'power3.out',
-          scrollTrigger: { trigger: '.steps-container', start: 'top 30%' },
+          scrollTrigger: { trigger: '.steps-container', start: 'top 80%' },
         },
       )
 
@@ -167,7 +167,7 @@ export function LandingPage() {
           scale: 1,
           duration: 0.7,
           ease: 'power3.out',
-          scrollTrigger: { trigger: '.cta-section', start: 'top 30%' },
+          scrollTrigger: { trigger: '.cta-section', start: 'top 80%' },
         },
       )
     },
