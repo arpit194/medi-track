@@ -12,7 +12,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Medi Track' },
+      { name: 'theme-color', content: '#1a7a5e' },
+      { title: 'MediTrack' },
+    ],
+    links: [
+      { rel: 'manifest', href: '/manifest.json' },
+      { rel: 'apple-touch-icon', href: '/logo192.png' },
     ],
   }),
   shellComponent: RootDocument,

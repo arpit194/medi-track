@@ -6,7 +6,8 @@ MediTrack is a patient-facing web app for digitally managing medical reports —
 
 | Document | Description |
 |---|---|
-| [Product Requirements](docs/PRD.md) | Problem statement, target users, features, design principles, and roadmap |
+| [Product Requirements](docs/PRD.md) | Problem statement, target users, features, and design principles |
+| [Roadmap](docs/ROADMAP.md) | Planned features with completion tracking |
 | [Developer Setup](docs/SETUP.md) | Prerequisites, environment variables, running locally, and scripts reference |
 | [Architecture](docs/ARCHITECTURE.md) | Monorepo structure, tech stack, data flow, and key patterns |
 
