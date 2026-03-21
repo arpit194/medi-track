@@ -24,10 +24,10 @@ Items are grouped by theme. Check off items as they are completed.
 
 ## Internationalisation (i18n)
 
-- [ ] Set up i18n framework (e.g. `react-i18next` or `lingui`)
-- [ ] Extract all UI strings to translation files
-- [ ] English (default)
-- [ ] Hindi
+- [x] Set up i18n framework (react-i18next + i18next-browser-languagedetector)
+- [x] Extract all UI strings to translation files
+- [x] English (default)
+- [x] Hindi
 - [ ] Gujarati
 - [ ] Tamil
 - [ ] Telugu
@@ -42,7 +42,7 @@ Items are grouped by theme. Check off items as they are completed.
 
 ## Auth & accounts
 
-- [ ] Email sending for password reset (integrate a mail provider — e.g. Resend, SendGrid)
+- [x] Email sending for password reset (Resend, verified domain medi-track.arpit194.in)
 - [ ] Email verification on signup
 - [ ] Google / Apple sign-in (OAuth)
 - [ ] Account deletion with data export

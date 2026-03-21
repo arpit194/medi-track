@@ -1,11 +1,13 @@
 import { Injectable, ConflictException, UnauthorizedException, BadRequestException, Inject } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
 import * as bcrypt from 'bcryptjs'
 import * as crypto from 'crypto'
 import type { Response, Request } from 'express'
 import type { AuthResponse, User } from '@medi-track/types'
 import type { JwtPayload } from '../common/types/jwt'
 import { PrismaService } from '../prisma/prisma.service'
+import { EmailService } from '../email/email.service'
 import { toUser } from '../common/utils/user.utils'
 
 const REFRESH_COOKIE = 'mt_refresh_token'
@@ -16,6 +18,8 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly email: EmailService,
+    private readonly config: ConfigService,
     @Inject('REFRESH_JWT') private readonly refreshJwt: JwtService,
   ) {}
 
@@ -90,8 +94,9 @@ export class AuthService {
       data: { userId: user.id, token, expiresAt },
     })
 
-    // TODO: send reset email with token once mail service is configured
-    console.log(`[DEV] Password reset link: http://localhost:3000/reset-password?token=${token}`)
+    const frontendUrl = this.config.getOrThrow<string>('FRONTEND_URL').split(',')[0]
+    const resetLink = `${frontendUrl}/reset-password?token=${token}`
+    await this.email.sendPasswordReset(user.email, user.name, resetLink)
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
