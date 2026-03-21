@@ -3,7 +3,7 @@ import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
 import { onboardingProfileSchema } from '#/lib/onboarding-schemas'
 import { getErrorMessage } from '#/api/client'
-import { useUpdateProfileMutation } from '#/hooks/user'
+import { useUser, useUpdateProfileMutation } from '#/hooks/user'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
 import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field'
@@ -14,6 +14,7 @@ const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
 export function OnboardingProfileForm() {
   const navigate = useNavigate()
+  const { data: user } = useUser()
   const updateProfile = useUpdateProfileMutation()
 
   const form = useForm({
@@ -21,7 +22,7 @@ export function OnboardingProfileForm() {
     validators: { onChange: onboardingProfileSchema },
     onSubmit: async ({ value }) => {
       try {
-        await updateProfile.mutateAsync(value)
+        await updateProfile.mutateAsync({ name: user!.name, ...value })
         await navigate({ to: '/onboarding/first-upload' })
       } catch {
         // error displayed via updateProfile.isError

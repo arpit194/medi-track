@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { OctagonXIcon } from 'lucide-react'
-import type { User } from '#/api/user'
+import type { User } from '@medi-track/types'
 import { getErrorMessage } from '#/api/client'
 import { useUser } from '#/hooks/user'
 import { Avatar, AvatarFallback } from '#/components/ui/avatar'

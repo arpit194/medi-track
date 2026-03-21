@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
-import { ChevronRightIcon, SettingsIcon, UserIcon, LogOutIcon } from 'lucide-react'
+import { ChevronRightIcon } from 'lucide-react'
 import { cn } from '#/lib/utils'
 import { NAV_ITEMS, type NavItem } from '#/lib/nav'
 import {
@@ -19,16 +19,10 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '#/components/ui/sidebar'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '#/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger } from '#/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '#/components/ui/avatar'
+import { UserMenuContent } from '#/components/shared/layout/UserMenuContent'
+import { useUser } from '#/hooks/user'
 
 function NavGroup({ item }: { item: NavItem }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -90,7 +84,20 @@ function NavGroup({ item }: { item: NavItem }) {
   )
 }
 
+function getInitials(name: string) {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+}
+
 export function AppSidebar() {
+  const { data: user } = useUser()
+  const initials = user ? getInitials(user.name) : ''
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-3">
@@ -122,35 +129,16 @@ export function AppSidebar() {
                 <div className="flex items-center gap-3 rounded-md p-2 hover:bg-sidebar-accent">
                   <Avatar className="size-7 shrink-0">
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      AU
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex min-w-0 flex-1 flex-col items-end group-data-[collapsible=icon]:hidden">
-                    <span className="truncate text-sm font-medium">Test User</span>
-                    <span className="truncate text-xs text-muted-foreground">test@example.com</span>
+                    <span className="truncate text-sm font-medium">{user?.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
                   </div>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" align="start" className="w-52">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>My account</DropdownMenuLabel>
-                  <DropdownMenuItem render={<Link to="/profile" />}>
-                    <UserIcon />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem render={<Link to="/settings" />}>
-                    <SettingsIcon />
-                    Settings
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem variant="destructive" render={<Link to="/login" />}>
-                    <LogOutIcon />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
+              <UserMenuContent align="start" />
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>

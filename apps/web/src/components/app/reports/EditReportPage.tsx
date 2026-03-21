@@ -1,5 +1,6 @@
+import { useRef, useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, OctagonXIcon } from 'lucide-react'
+import { ArrowLeftIcon, OctagonXIcon, UploadIcon, XIcon, LoaderCircleIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useForm } from '@tanstack/react-form'
 import { cn } from '#/lib/utils'
@@ -12,24 +13,17 @@ import {
   FieldGroup,
   FieldLabel,
 } from '#/components/ui/field'
-import { NativeSelect, NativeSelectOption } from '#/components/ui/native-select'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
+import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '#/components/ui/combobox'
 import { Skeleton } from '#/components/ui/skeleton'
 import { Card, CardContent } from '#/components/ui/card'
 import { DatePicker } from '#/components/shared/DatePicker'
-import { useReport, useUpdateReportMutation } from '#/hooks/reports'
+import { useReport, useUpdateReportMutation, useReplaceReportFileMutation, useReportFilters } from '#/hooks/reports'
 import { getErrorMessage } from '#/api/client'
 import { editReportSchema } from '#/lib/report-schemas'
-import { REPORT_TYPE_VALUES } from '#/api/reports'
-import type { Report, ReportType } from '#/api/reports'
-
-const TYPE_LABELS: Record<ReportType, string> = {
-  blood_test: 'Blood test',
-  xray: 'X-Ray',
-  prescription: 'Prescription',
-  scan: 'Scan',
-  other: 'Other',
-}
+import { compressImageIfNeeded } from '#/lib/compress-image'
+import { REPORT_TYPE_SUGGESTIONS } from '#/api/reports'
+import type { Report } from '@medi-track/types'
 
 function EditReportPageSkeleton() {
   return (
@@ -52,6 +46,12 @@ function EditReportPageSkeleton() {
 function EditReportForm({ report }: { report: Report }) {
   const navigate = useNavigate()
   const updateMutation = useUpdateReportMutation(report.id)
+  const replaceFileMutation = useReplaceReportFileMutation(report.id)
+  const { data: filters } = useReportFilters()
+  const typeOptions = [...new Set([...REPORT_TYPE_SUGGESTIONS, ...(filters?.types ?? [])])]
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [isCompressing, setIsCompressing] = useState(false)
 
   const form = useForm({
     defaultValues: {
@@ -59,7 +59,7 @@ function EditReportForm({ report }: { report: Report }) {
       title: report.title,
       date: report.date,
       doctorName: report.doctorName,
-      notes: report.notes,
+      notes: report.notes ?? '',
     },
     validators: { onChange: editReportSchema },
     onSubmit: async ({ value }) => {
@@ -99,21 +99,42 @@ function EditReportForm({ report }: { report: Report }) {
             {(field) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>Report type</FieldLabel>
-                <NativeSelect
-                  id={field.name}
+                <Combobox
                   value={field.state.value}
-                  onChange={(e) =>
-                    field.handleChange(e.target.value as ReportType)
-                  }
-                  onBlur={field.handleBlur}
-                  className="w-full [&_select]:h-11"
+                  onValueChange={(v) => field.handleChange(v ?? '')}
                 >
-                  {REPORT_TYPE_VALUES.map((type) => (
-                    <NativeSelectOption key={type} value={type}>
-                      {TYPE_LABELS[type]}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  <ComboboxInput
+                    id={field.name}
+                    showTrigger
+                    showClear
+                    placeholder="e.g. Blood Test"
+                    className="h-11 w-full"
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
+                    aria-describedby={
+                      field.state.meta.isTouched && field.state.meta.errors.length > 0
+                        ? 'edit-type-error'
+                        : undefined
+                    }
+                  />
+                  <ComboboxContent>
+                    <ComboboxList>
+                      {typeOptions.map((type) => (
+                        <ComboboxItem key={type} value={type}>
+                          {type}
+                        </ComboboxItem>
+                      ))}
+                      <ComboboxEmpty>Press Enter to use your own type</ComboboxEmpty>
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+                {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
+                  <FieldError
+                    id="edit-type-error"
+                    errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
+                  />
+                )}
               </Field>
             )}
           </form.Field>
@@ -232,6 +253,88 @@ function EditReportForm({ report }: { report: Report }) {
             )}
           </form.Field>
         </FieldGroup>
+
+        {/* File replacement */}
+        <div className="flex flex-col gap-3">
+          <span className="text-sm font-medium">Attachment</span>
+          {report.files.length > 0 && !pendingFile && (
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted px-3 py-2">
+              <span className="truncate text-sm text-muted-foreground">{report.files[0]!.name}</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Replace file
+              </Button>
+            </div>
+          )}
+          {pendingFile && (
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-muted px-3 py-2">
+              <span className="truncate text-sm">{pendingFile.name}</span>
+              <div className="flex shrink-0 items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={isCompressing || replaceFileMutation.isPending}
+                  onClick={async () => {
+                    try {
+                      setIsCompressing(true)
+                      const compressed = await compressImageIfNeeded(pendingFile)
+                      setIsCompressing(false)
+                      await replaceFileMutation.mutateAsync(compressed)
+                      toast.success('File replaced.')
+                      setPendingFile(null)
+                    } catch {
+                      setIsCompressing(false)
+                      // error shown via replaceFileMutation.isError
+                    }
+                  }}
+                >
+                  {(isCompressing || replaceFileMutation.isPending) && <LoaderCircleIcon className="size-4 animate-spin" />}
+                  {isCompressing ? 'Compressing…' : replaceFileMutation.isPending ? 'Uploading…' : 'Upload'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Cancel replacement"
+                  className="size-7"
+                  onClick={() => setPendingFile(null)}
+                >
+                  <XIcon className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+          {replaceFileMutation.isError && (
+            <p className="text-sm text-destructive">{getErrorMessage(replaceFileMutation.error)}</p>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0] ?? null
+              setPendingFile(file)
+              if (fileInputRef.current) fileInputRef.current.value = ''
+            }}
+          />
+          {report.files.length === 0 && !pendingFile && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border p-6 text-muted-foreground transition-colors hover:border-ring hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <UploadIcon className="size-6" />
+              <span className="text-sm">Tap to attach a file</span>
+              <span className="text-xs">PDF, JPG, PNG up to 10 MB</span>
+            </button>
+          )}
+        </div>
 
         <div className="flex flex-col gap-3 sm:flex-row-reverse">
           <form.Subscribe

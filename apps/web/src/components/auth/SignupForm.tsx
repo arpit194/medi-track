@@ -18,7 +18,8 @@ export function SignupForm() {
     validators: { onChange: signupSchema },
     onSubmit: async ({ value }) => {
       try {
-        await signupMutation.mutateAsync(value)
+        const { confirmPassword: _, ...signupData } = value
+        await signupMutation.mutateAsync(signupData)
         await navigate({ to: '/onboarding/profile' })
       } catch {
         // error displayed via signupMutation.isError

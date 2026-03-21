@@ -18,8 +18,8 @@ export function LoginForm() {
     validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
       try {
-        await loginMutation.mutateAsync(value)
-        await navigate({ to: '/dashboard' })
+        const { user } = await loginMutation.mutateAsync(value)
+        await navigate({ to: user.isOnboarded ? '/dashboard' : '/onboarding/profile' })
       } catch {
         // error displayed via loginMutation.isError
       }

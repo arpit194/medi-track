@@ -1,4 +1,4 @@
-import type { UpdateProfileInput, ChangePasswordInput, User } from '#/api/user'
+import type { User, UpdateProfileRequest, ChangePasswordRequest } from '@medi-track/types'
 import { delay } from './_utils'
 
 const MOCK_USER: User = {
@@ -8,7 +8,11 @@ const MOCK_USER: User = {
   dob: '1990-06-15',
   bloodType: 'O+',
   gender: 'prefer_not_to_say',
+  role: 'patient',
+  isOnboarded: true,
   createdAt: '2024-01-10T08:00:00Z',
+  updatedAt: '2024-01-10T08:00:00Z',
+  lastLoginAt: null,
 }
 
 export async function getUser(): Promise<User> {
@@ -16,12 +20,12 @@ export async function getUser(): Promise<User> {
   return { ...MOCK_USER }
 }
 
-export async function updateProfile(input: UpdateProfileInput): Promise<User> {
+export async function updateProfile(input: UpdateProfileRequest): Promise<User> {
   await delay()
-  return { ...MOCK_USER, ...input }
+  return { ...MOCK_USER, ...input, isOnboarded: true }
 }
 
-export async function changePassword(_input: ChangePasswordInput): Promise<void> {
+export async function changePassword(_input: ChangePasswordRequest): Promise<void> {
   await delay()
 }
 

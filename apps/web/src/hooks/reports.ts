@@ -1,17 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '#/api'
-import type { UpdateReportInput } from '#/api/reports'
+import type { ListReportsQuery, UpdateReportRequest } from '@medi-track/types'
 
 export const reportKeys = {
   all: ['reports'] as const,
-  list: () => [...reportKeys.all, 'list'] as const,
+  filters: () => [...reportKeys.all, 'filters'] as const,
+  list: (query?: ListReportsQuery) => [...reportKeys.all, 'list', query] as const,
   detail: (id: string) => [...reportKeys.all, 'detail', id] as const,
 }
 
-export function useReports() {
+export function useReportFilters() {
   return useQuery({
-    queryKey: reportKeys.list(),
-    queryFn: api.reports.listReports,
+    queryKey: reportKeys.filters(),
+    queryFn: api.reports.getReportFilters,
+  })
+}
+
+export function useReports(query: ListReportsQuery = {}) {
+  return useQuery({
+    queryKey: reportKeys.list(query),
+    queryFn: () => api.reports.listReports(query),
   })
 }
 
@@ -27,7 +35,18 @@ export function useCreateReportMutation() {
   return useMutation({
     mutationFn: api.reports.createReport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: reportKeys.list() })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+    },
+  })
+}
+
+export function useReplaceReportFileMutation(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (file: File) => api.reports.replaceReportFile(id, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reportKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
     },
   })
 }
@@ -35,10 +54,10 @@ export function useCreateReportMutation() {
 export function useUpdateReportMutation(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: UpdateReportInput) => api.reports.updateReport(id, input),
+    mutationFn: (input: UpdateReportRequest) => api.reports.updateReport(id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reportKeys.detail(id) })
-      queryClient.invalidateQueries({ queryKey: reportKeys.list() })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
     },
   })
 }

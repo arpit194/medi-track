@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "pnpm --filter @medi-track/web dev",
     "dev:api": "pnpm --filter @medi-track/api dev",
+    "dev:api:debug": "pnpm --filter @medi-track/api dev:debug",
     "build": "pnpm --filter @medi-track/web build",
     "build:api": "pnpm --filter @medi-track/api build",
     "lint": "pnpm --filter @medi-track/web lint",

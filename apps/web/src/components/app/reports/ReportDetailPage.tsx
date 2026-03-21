@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, CalendarIcon, UserIcon, FileTextIcon, OctagonXIcon, PencilIcon } from 'lucide-react'
+import { ArrowLeftIcon, CalendarIcon, UserIcon, FileTextIcon, OctagonXIcon, PencilIcon, EyeIcon, DownloadIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { buttonVariants } from '#/components/ui/button'
@@ -20,9 +21,11 @@ import {
   AlertDialogTrigger,
 } from '#/components/ui/alert-dialog'
 import { Button } from '#/components/ui/button'
-import { ReportTypeBadge } from '#/components/shared/ReportTypeBadge'
+import { Badge } from '#/components/ui/badge'
 import { useReport, useDeleteReportMutation } from '#/hooks/reports'
 import { getErrorMessage } from '#/api/client'
+import { ReportFileViewer } from '#/components/app/reports/ReportFileViewer'
+import type { ReportFile } from '@medi-track/types'
 
 function ReportDetailPageSkeleton() {
   return (
@@ -49,6 +52,7 @@ export function ReportDetailPage({ id }: { id: string }) {
   const navigate = useNavigate()
   const { data: report, isLoading, isError, error } = useReport(id)
   const deleteMutation = useDeleteReportMutation()
+  const [viewingFile, setViewingFile] = useState<ReportFile | null>(null)
 
   async function handleDelete() {
     try {
@@ -87,7 +91,7 @@ export function ReportDetailPage({ id }: { id: string }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="wrap-break-word text-2xl font-medium">{report.title}</h1>
-          <ReportTypeBadge type={report.type} />
+          <Badge>{report.type}</Badge>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Link
@@ -169,19 +173,47 @@ export function ReportDetailPage({ id }: { id: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            {report.files.map((url, i) => (
-              <a
-                key={i}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-base text-primary underline-offset-4 hover:underline"
-              >
-                File {i + 1}
-              </a>
+            {report.files.map((file) => (
+              <div key={file.id} className="flex items-center justify-between gap-3">
+                <span className="truncate text-base">{file.name}</span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setViewingFile(file)}
+                  >
+                    <EyeIcon className="size-4" />
+                    View
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      const blob = await fetch(file.url).then((r) => r.blob())
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = file.name
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    }}
+                  >
+                    <DownloadIcon className="size-4" />
+                    Download
+                  </Button>
+                </div>
+              </div>
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {viewingFile && (
+        <ReportFileViewer
+          file={viewingFile}
+          open={!!viewingFile}
+          onClose={() => setViewingFile(null)}
+        />
       )}
     </div>
   )

@@ -14,7 +14,16 @@ export function ResetPasswordPage() {
         </p>
       </div>
 
-      <ResetPasswordForm token={token} />
+      {token ? (
+        <ResetPasswordForm token={token} />
+      ) : (
+        <p className="text-center text-muted-foreground">
+          This reset link is invalid or has expired.{' '}
+          <Link to="/forgot-password" className="font-medium text-foreground underline underline-offset-4">
+            Request a new one
+          </Link>
+        </p>
+      )}
 
       <p className="text-center text-muted-foreground">
         Remembered it?{' '}

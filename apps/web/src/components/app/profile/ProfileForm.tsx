@@ -1,9 +1,9 @@
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { onboardingProfileSchema } from '#/lib/onboarding-schemas'
+import { profileSchema } from '#/lib/onboarding-schemas'
 import { getErrorMessage } from '#/api/client'
-import type { User } from '#/api/user'
+import type { User } from '@medi-track/types'
 import { useUpdateProfileMutation } from '#/hooks/user'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
 import { Button } from '#/components/ui/button'
@@ -17,8 +17,8 @@ export function ProfileForm({ user }: { user: User }) {
   const updateProfile = useUpdateProfileMutation()
 
   const form = useForm({
-    defaultValues: { dob: user.dob, bloodType: user.bloodType, gender: user.gender },
-    validators: { onChange: onboardingProfileSchema },
+    defaultValues: { name: user.name, dob: user.dob ?? '', bloodType: user.bloodType ?? '', gender: user.gender ?? '' },
+    validators: { onChange: profileSchema },
     onSubmit: async ({ value }) => {
       try {
         await updateProfile.mutateAsync(value)

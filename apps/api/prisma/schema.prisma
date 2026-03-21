@@ -17,18 +17,70 @@ enum UserRole {
 // ---- Models ----
 
 model User {
-  id          String    @id @default(cuid())
+  id          String     @id @default(uuid(7))
   name        String
-  email       String    @unique
+  email       String     @unique
   password    String
   dob         String?
   bloodType   String?
   gender      String?
-  role        UserRole  @default(patient)
-  isOnboarded Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  role        UserRole   @default(patient)
+  isOnboarded Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   deletedAt   DateTime?
   deletedBy   String?
   lastLoginAt DateTime?
+  reports             Report[]
+  passwordResetTokens PasswordResetToken[]
+  shareLinks          ShareLink[]
+}
+
+model Report {
+  id         String       @id @default(uuid(7))
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  type       String
+  title      String
+  date       String       // report date (not upload date), ISO string e.g. "2024-03-15"
+  doctorName String
+  notes      String?
+  files      ReportFile[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+}
+
+model ReportFile {
+  id        String   @id @default(uuid(7))
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id])
+  key       String   // UploadThing file key — required for deletion
+  url       String
+  name      String   // original filename
+  size      Int      // bytes
+  createdAt DateTime @default(now())
+}
+
+model ShareLink {
+  id        String   @id @default(uuid(7))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  reportIds String[]
+  label     String
+  token     String   @unique
+  expiresIn String
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid(7))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
 }

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, OctagonXIcon, UploadIcon, XIcon } from 'lucide-react'
+import { ArrowLeftIcon, LoaderCircleIcon, OctagonXIcon, UploadIcon, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useForm } from '@tanstack/react-form'
 import { cn } from '#/lib/utils'
@@ -9,32 +9,28 @@ import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
 import { Textarea } from '#/components/ui/textarea'
 import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field'
-import { NativeSelect, NativeSelectOption } from '#/components/ui/native-select'
 import { Alert, AlertTitle, AlertDescription } from '#/components/ui/alert'
+import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '#/components/ui/combobox'
 import { DatePicker } from '#/components/shared/DatePicker'
-import { useCreateReportMutation } from '#/hooks/reports'
+import { useCreateReportMutation, useReportFilters } from '#/hooks/reports'
 import { getErrorMessage } from '#/api/client'
 import { uploadReportSchema } from '#/lib/report-schemas'
-import { REPORT_TYPE_VALUES } from '#/api/reports'
-import type { ReportType } from '#/api/reports'
-
-const TYPE_LABELS: Record<ReportType, string> = {
-  blood_test: 'Blood test',
-  xray: 'X-Ray',
-  prescription: 'Prescription',
-  scan: 'Scan',
-  other: 'Other',
-}
+import { compressImageIfNeeded } from '#/lib/compress-image'
+import { REPORT_TYPE_SUGGESTIONS } from '#/api/reports'
 
 export function UploadReportPage() {
   const navigate = useNavigate()
   const createMutation = useCreateReportMutation()
+  const { data: filters } = useReportFilters()
+  const typeOptions = [...new Set([...REPORT_TYPE_SUGGESTIONS, ...(filters?.types ?? [])])]
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [files, setFiles] = useState<File[]>([])
+  const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
+  const [isCompressing, setIsCompressing] = useState(false)
 
   const form = useForm({
     defaultValues: {
-      type: 'blood_test' as ReportType,
+      type: 'Blood Test',
       title: '',
       date: '',
       doctorName: '',
@@ -42,24 +38,33 @@ export function UploadReportPage() {
     },
     validators: { onChange: uploadReportSchema },
     onSubmit: async ({ value }) => {
+      if (!file) {
+        setFileError('Please attach a file for this report.')
+        return
+      }
       try {
-        await createMutation.mutateAsync({ ...value, files })
+        setIsCompressing(true)
+        const compressed = await compressImageIfNeeded(file!)
+        setIsCompressing(false)
+        await createMutation.mutateAsync({ ...value, file: compressed })
         toast.success('Report uploaded successfully.')
         navigate({ to: '/reports' })
       } catch {
+        setIsCompressing(false)
         // error shown via createMutation.isError
       }
     },
   })
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(e.target.files ?? [])
-    setFiles((prev) => [...prev, ...selected])
+    const selected = e.target.files?.[0] ?? null
+    setFile(selected)
+    if (selected) setFileError(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  function removeFile(index: number) {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
+  function removeFile() {
+    setFile(null)
   }
 
   return (
@@ -98,20 +103,42 @@ export function UploadReportPage() {
             {(field) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>Report type</FieldLabel>
-                <NativeSelect
-                  id={field.name}
+                <Combobox
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value as ReportType)}
-                  onBlur={field.handleBlur}
-                  className="w-full [&_select]:h-11"
-                  aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
+                  onValueChange={(v) => field.handleChange(v ?? '')}
                 >
-                  {REPORT_TYPE_VALUES.map((type) => (
-                    <NativeSelectOption key={type} value={type}>
-                      {TYPE_LABELS[type]}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  <ComboboxInput
+                    id={field.name}
+                    showTrigger
+                    showClear
+                    placeholder="e.g. Blood Test"
+                    className="h-11 w-full"
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
+                    aria-describedby={
+                      field.state.meta.isTouched && field.state.meta.errors.length > 0
+                        ? 'type-error'
+                        : undefined
+                    }
+                  />
+                  <ComboboxContent>
+                    <ComboboxList>
+                      {typeOptions.map((type) => (
+                        <ComboboxItem key={type} value={type}>
+                          {type}
+                        </ComboboxItem>
+                      ))}
+                      <ComboboxEmpty>Press Enter to use your own type</ComboboxEmpty>
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+                {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
+                  <FieldError
+                    id="type-error"
+                    errors={field.state.meta.errors.map((e) => ({ message: e?.message }))}
+                  />
+                )}
               </Field>
             )}
           </form.Field>
@@ -219,7 +246,7 @@ export function UploadReportPage() {
 
         {/* File upload */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium">Attachments (optional)</span>
+          <span className="text-sm font-medium">Attachment</span>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -232,32 +259,29 @@ export function UploadReportPage() {
           <input
             ref={fileInputRef}
             type="file"
-            multiple
             accept=".pdf,.jpg,.jpeg,.png"
             className="hidden"
             onChange={handleFileChange}
           />
-          {files.length > 0 && (
+          {file && (
             <ul className="flex flex-col gap-2">
-              {files.map((file, i) => (
-                <li
-                  key={i}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-muted px-3 py-2"
+              <li className="flex items-center justify-between gap-3 rounded-lg bg-muted px-3 py-2">
+                <span className="truncate text-sm">{file.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Remove ${file.name}`}
+                  className="size-7 shrink-0"
+                  onClick={removeFile}
                 >
-                  <span className="truncate text-sm">{file.name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`Remove ${file.name}`}
-                    className="size-7 shrink-0"
-                    onClick={() => removeFile(i)}
-                  >
-                    <XIcon className="size-4" />
-                  </Button>
-                </li>
-              ))}
+                  <XIcon className="size-4" />
+                </Button>
+              </li>
             </ul>
+          )}
+          {fileError && (
+            <p className="text-sm text-destructive">{fileError}</p>
           )}
         </div>
 
@@ -269,7 +293,8 @@ export function UploadReportPage() {
                 className="w-full sm:w-auto"
                 disabled={!canSubmit || !!isSubmitting}
               >
-                {isSubmitting ? 'Uploading…' : 'Upload report'}
+                {(isCompressing || !!isSubmitting) && <LoaderCircleIcon className="size-4 animate-spin" />}
+                {isCompressing ? 'Compressing…' : isSubmitting ? 'Uploading…' : 'Upload report'}
               </Button>
             )}
           </form.Subscribe>

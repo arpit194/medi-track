@@ -13,6 +13,8 @@ type DatePickerProps = {
   id?: string
   placeholder?: string
   disabled?: boolean
+  fromDate?: string // ISO "YYYY-MM-DD"
+  toDate?: string   // ISO "YYYY-MM-DD"
   fromYear?: number
   toYear?: number
   disableFuture?: boolean
@@ -27,6 +29,8 @@ export function DatePicker({
   id,
   placeholder = 'Pick a date',
   disabled = false,
+  fromDate,
+  toDate,
   fromYear,
   toYear,
   disableFuture = false,
@@ -37,6 +41,15 @@ export function DatePicker({
 
   const selected = value && isValid(parseISO(value)) ? parseISO(value) : undefined
   const currentYear = new Date().getFullYear()
+  const parsedFromDate = fromDate && isValid(parseISO(fromDate)) ? parseISO(fromDate) : undefined
+  const parsedToDate = toDate && isValid(parseISO(toDate)) ? parseISO(toDate) : undefined
+
+  function isDisabled(date: Date): boolean {
+    if (disableFuture && date > new Date()) return true
+    if (parsedFromDate && date < parsedFromDate) return true
+    if (parsedToDate && date > parsedToDate) return true
+    return false
+  }
 
   function handleSelect(date: Date | undefined) {
     onChange(date ? format(date, 'yyyy-MM-dd') : '')
@@ -68,11 +81,14 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={selected}
+          defaultMonth={selected ?? parsedFromDate}
           onSelect={handleSelect}
           captionLayout="dropdown"
-          fromYear={fromYear ?? currentYear - 120}
-          toYear={toYear ?? (disableFuture ? currentYear : currentYear + 10)}
-          disabled={disableFuture ? (date) => date > new Date() : undefined}
+          startMonth={parsedFromDate}
+          endMonth={parsedToDate ?? (disableFuture ? new Date() : undefined)}
+          fromYear={fromYear ?? (parsedFromDate?.getFullYear() ?? currentYear - 120)}
+          toYear={toYear ?? (disableFuture ? currentYear : (parsedToDate?.getFullYear() ?? currentYear + 10))}
+          disabled={isDisabled}
           autoFocus
         />
       </PopoverContent>

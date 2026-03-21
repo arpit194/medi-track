@@ -4,34 +4,47 @@
   "private": true,
   "scripts": {
     "dev": "nest start --watch",
+    "dev:debug": "nest start --debug --watch",
     "build": "nest build",
     "start": "node dist/main",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:reset": "prisma migrate reset",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:reset": "pnpm db:migrate:reset && pnpm db:seed"
   },
   "dependencies": {
     "@medi-track/types": "workspace:*",
     "@nestjs/common": "^11.1.17",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.17",
+    "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.1.17",
     "@nestjs/swagger": "^11.2.6",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2",
     "rxjs": "^7",
+    "uploadthing": "^7.7.4",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^4",
     "@types/multer": "^1",
     "@types/node": "^22",
     "@types/pg": "^8.18.0",
     "prisma": "^7.5.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

@@ -1,7 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
+import { CreateShareLinkPage } from '#/components/app/share/CreateShareLinkPage'
 
-export const Route = createFileRoute('/_app/share/new')({ component: CreateShareLinkPage })
+const searchSchema = z.object({
+  type: z.string().optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+})
 
-function CreateShareLinkPage() {
-  return <div>Create Share Link</div>
-}
+export const Route = createFileRoute('/_app/share/new')({
+  validateSearch: searchSchema,
+  component: CreateShareLinkPage,
+})
