@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { PlusIcon, FolderOpenIcon, OctagonXIcon } from 'lucide-react'
 import { format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
 import { buttonVariants } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
@@ -127,6 +128,7 @@ function buildPageNumbers(current: number, total: number): (number | '...')[] {
 }
 
 export function ReportsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const search = useSearch({ from: '/_app/reports/' })
   const { page, limit, type, dateFrom, dateTo, sortOrder } = search
@@ -144,10 +146,10 @@ export function ReportsPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-medium">My Reports</h1>
+        <h1 className="text-2xl font-medium">{t('reports.heading')}</h1>
         <Link to="/reports/upload" className={cn(buttonVariants(), 'shrink-0')}>
           <PlusIcon className="size-4" />
-          Upload
+          {t('reports.uploadButton')}
         </Link>
       </div>
 
@@ -156,11 +158,11 @@ export function ReportsPage() {
           value={type ?? ''}
           onChange={(e) => setSearch({ type: e.target.value || undefined })}
           className="w-full [&_select]:h-11 [&_select]:w-full"
-          aria-label="Filter by report type"
+          aria-label={t('reports.filterByType')}
         >
-          <NativeSelectOption value="">All types</NativeSelectOption>
-          {filters?.types.map((t) => (
-            <NativeSelectOption key={t} value={t}>{t}</NativeSelectOption>
+          <NativeSelectOption value="">{t('common.allTypes')}</NativeSelectOption>
+          {filters?.types.map((type) => (
+            <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>
           ))}
         </NativeSelect>
 
@@ -168,10 +170,10 @@ export function ReportsPage() {
           value={sortOrder}
           onChange={(e) => setSearch({ sortOrder: e.target.value as 'asc' | 'desc' })}
           className="w-full [&_select]:h-11 [&_select]:w-full"
-          aria-label="Sort order"
+          aria-label={t('reports.sortOrder')}
         >
-          <NativeSelectOption value="desc">Newest first</NativeSelectOption>
-          <NativeSelectOption value="asc">Oldest first</NativeSelectOption>
+          <NativeSelectOption value="desc">{t('common.newestFirst')}</NativeSelectOption>
+          <NativeSelectOption value="asc">{t('common.oldestFirst')}</NativeSelectOption>
         </NativeSelect>
 
         <DatePicker
@@ -191,8 +193,8 @@ export function ReportsPage() {
       {isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Couldn't load your reports</AlertTitle>
-          <AlertDescription>{getErrorMessage(error)} Please try again.</AlertDescription>
+          <AlertTitle>{t('reports.loadError')}</AlertTitle>
+          <AlertDescription>{getErrorMessage(error)} {t('common.tryAgain')}</AlertDescription>
         </Alert>
       )}
 
@@ -208,11 +210,11 @@ export function ReportsPage() {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
-            <EmptyTitle>No reports yet</EmptyTitle>
-            <EmptyDescription>Your medical reports will appear here once you upload them.</EmptyDescription>
+            <EmptyTitle>{t('reports.noReportsHeading')}</EmptyTitle>
+            <EmptyDescription>{t('reports.noReportsDescription')}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Link to="/reports/upload" className={buttonVariants()}>Upload your first report</Link>
+            <Link to="/reports/upload" className={buttonVariants()}>{t('reports.uploadFirst')}</Link>
           </EmptyContent>
         </Empty>
       )}
@@ -221,8 +223,8 @@ export function ReportsPage() {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
-            <EmptyTitle>No reports found</EmptyTitle>
-            <EmptyDescription>Try adjusting your filters.</EmptyDescription>
+            <EmptyTitle>{t('reports.noResultsHeading')}</EmptyTitle>
+            <EmptyDescription>{t('reports.noResultsDescription')}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
@@ -241,12 +243,12 @@ export function ReportsPage() {
             value={limit}
             onChange={(e) => navigate({ to: '/reports', search: (prev) => ({ ...prev, limit: Number(e.target.value), page: 1 }) })}
             className="w-36 [&_select]:h-11"
-            aria-label="Reports per page"
+            aria-label={t('reports.reportsPerPage')}
           >
-            <NativeSelectOption value={5}>5 per page</NativeSelectOption>
-            <NativeSelectOption value={10}>10 per page</NativeSelectOption>
-            <NativeSelectOption value={20}>20 per page</NativeSelectOption>
-            <NativeSelectOption value={50}>50 per page</NativeSelectOption>
+            <NativeSelectOption value={5}>{t('common.perPage', { count: 5 })}</NativeSelectOption>
+            <NativeSelectOption value={10}>{t('common.perPage', { count: 10 })}</NativeSelectOption>
+            <NativeSelectOption value={20}>{t('common.perPage', { count: 20 })}</NativeSelectOption>
+            <NativeSelectOption value={50}>{t('common.perPage', { count: 50 })}</NativeSelectOption>
           </NativeSelect>
           <ReportsPagination page={page} totalPages={totalPages} />
         </div>

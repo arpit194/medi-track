@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
 import { UploadCloudIcon, FileIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '#/components/ui/button'
 import { OnboardingLayout } from './OnboardingLayout'
 
 export function OnboardingFirstUploadPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -34,9 +36,9 @@ export function OnboardingFirstUploadPage() {
     <OnboardingLayout step={2}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1 text-center">
-          <h1 className="font-serif text-3xl font-medium">Add your first record</h1>
+          <h1 className="font-serif text-3xl font-medium">{t('onboarding.firstUpload.heading')}</h1>
           <p className="text-muted-foreground leading-relaxed">
-            Upload a medical report to get started. You can add more later.
+            {t('onboarding.firstUpload.description')}
           </p>
         </div>
 
@@ -63,14 +65,14 @@ export function OnboardingFirstUploadPage() {
                     {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground">Tap to change file</span>
+                <span className="text-xs text-muted-foreground">{t('onboarding.firstUpload.tapToChange')}</span>
               </>
             ) : (
               <>
                 <UploadCloudIcon className="size-8 text-muted-foreground" />
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">Tap to upload a file</span>
-                  <span className="text-xs text-muted-foreground">PDF, JPG, or PNG</span>
+                  <span className="text-sm font-medium">{t('onboarding.firstUpload.tapToUpload')}</span>
+                  <span className="text-xs text-muted-foreground">{t('onboarding.firstUpload.fileTypes')}</span>
                 </div>
               </>
             )}
@@ -92,14 +94,14 @@ export function OnboardingFirstUploadPage() {
             onClick={handleContinue}
             disabled={!selectedFile}
           >
-            Upload and continue
+            {t('onboarding.firstUpload.uploadAndContinue')}
           </Button>
 
           <Link
             to="/onboarding/done"
             className="text-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
           >
-            Skip for now
+            {t('onboarding.firstUpload.skipForNow')}
           </Link>
         </div>
       </div>

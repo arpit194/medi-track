@@ -1,16 +1,18 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Route } from '#/routes/_auth/reset-password'
 import { ResetPasswordForm } from './ResetPasswordForm'
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation()
   const { token } = Route.useSearch()
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="font-serif text-3xl font-medium">Set a new password</h1>
+        <h1 className="font-serif text-3xl font-medium">{t('auth.resetPassword.heading')}</h1>
         <p className="text-muted-foreground leading-relaxed">
-          Choose a strong password you haven't used before.
+          {t('auth.resetPassword.description')}
         </p>
       </div>
 
@@ -18,17 +20,17 @@ export function ResetPasswordPage() {
         <ResetPasswordForm token={token} />
       ) : (
         <p className="text-center text-muted-foreground">
-          This reset link is invalid or has expired.{' '}
+          {t('auth.resetPassword.invalidLink')}{' '}
           <Link to="/forgot-password" className="font-medium text-foreground underline underline-offset-4">
-            Request a new one
+            {t('auth.resetPassword.requestNewOne')}
           </Link>
         </p>
       )}
 
       <p className="text-center text-muted-foreground">
-        Remembered it?{' '}
+        {t('auth.resetPassword.rememberedIt')}{' '}
         <Link to="/login" className="font-medium text-foreground underline underline-offset-4">
-          Back to sign in
+          {t('auth.resetPassword.backToSignIn')}
         </Link>
       </p>
     </div>

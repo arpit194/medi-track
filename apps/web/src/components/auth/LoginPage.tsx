@@ -1,13 +1,16 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { LoginForm } from './LoginForm'
 
 export function LoginPage() {
+  const { t } = useTranslation()
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="font-serif text-3xl font-medium">Welcome back</h1>
+        <h1 className="font-serif text-3xl font-medium">{t('auth.login.heading')}</h1>
         <p className="text-muted-foreground leading-relaxed">
-          Sign in to access your medical records.
+          {t('auth.login.description')}
         </p>
       </div>
 
@@ -15,12 +18,12 @@ export function LoginPage() {
 
       <div className="flex flex-col gap-2 text-center text-muted-foreground">
         <p>
-          Don't have an account?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link
             to="/signup"
             className="font-medium text-foreground underline underline-offset-4"
           >
-            Create one
+            {t('auth.login.createOne')}
           </Link>
         </p>
         <p>
@@ -28,7 +31,7 @@ export function LoginPage() {
             to="/forgot-password"
             className="font-medium text-foreground underline underline-offset-4"
           >
-            Forgot your password?
+            {t('auth.login.forgotPassword')}
           </Link>
         </p>
       </div>

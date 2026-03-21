@@ -3,6 +3,7 @@ import { useNavigate, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, OctagonXIcon, UploadIcon, XIcon, LoaderCircleIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useForm } from '@tanstack/react-form'
+import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
 import { Button, buttonVariants } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
@@ -20,7 +21,7 @@ import { Card, CardContent } from '#/components/ui/card'
 import { DatePicker } from '#/components/shared/DatePicker'
 import { useReport, useUpdateReportMutation, useReplaceReportFileMutation, useReportFilters } from '#/hooks/reports'
 import { getErrorMessage } from '#/api/client'
-import { editReportSchema } from '#/lib/report-schemas'
+import { createReportSchemas } from '#/lib/report-schemas'
 import { compressImageIfNeeded } from '#/lib/compress-image'
 import { REPORT_TYPE_SUGGESTIONS } from '#/api/reports'
 import type { Report } from '@medi-track/types'
@@ -44,6 +45,7 @@ function EditReportPageSkeleton() {
 }
 
 function EditReportForm({ report }: { report: Report }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const updateMutation = useUpdateReportMutation(report.id)
   const replaceFileMutation = useReplaceReportFileMutation(report.id)
@@ -52,6 +54,7 @@ function EditReportForm({ report }: { report: Report }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [isCompressing, setIsCompressing] = useState(false)
+  const { editReportSchema } = createReportSchemas(t)
 
   const form = useForm({
     defaultValues: {
@@ -65,7 +68,7 @@ function EditReportForm({ report }: { report: Report }) {
     onSubmit: async ({ value }) => {
       try {
         await updateMutation.mutateAsync(value)
-        toast.success('Report updated.')
+        toast.success(t('reports.edit.updateSuccess'))
         navigate({ to: '/reports/$id', params: { id: report.id } })
       } catch {
         // error shown via updateMutation.isError
@@ -78,9 +81,9 @@ function EditReportForm({ report }: { report: Report }) {
       {updateMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('reports.edit.updateError')}</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(updateMutation.error)} Please try again.
+            {getErrorMessage(updateMutation.error)} {t('common.tryAgain')}
           </AlertDescription>
         </Alert>
       )}
@@ -98,7 +101,7 @@ function EditReportForm({ report }: { report: Report }) {
           <form.Field name="type">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Report type</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.edit.typeLabel')}</FieldLabel>
                 <Combobox
                   value={field.state.value}
                   onValueChange={(v) => field.handleChange(v ?? '')}
@@ -107,7 +110,7 @@ function EditReportForm({ report }: { report: Report }) {
                     id={field.name}
                     showTrigger
                     showClear
-                    placeholder="e.g. Blood Test"
+                    placeholder={t('reports.edit.typePlaceholder')}
                     className="h-11 w-full"
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
@@ -125,7 +128,7 @@ function EditReportForm({ report }: { report: Report }) {
                           {type}
                         </ComboboxItem>
                       ))}
-                      <ComboboxEmpty>Press Enter to use your own type</ComboboxEmpty>
+                      <ComboboxEmpty>{t('reports.edit.typeCustomHint')}</ComboboxEmpty>
                     </ComboboxList>
                   </ComboboxContent>
                 </Combobox>
@@ -142,7 +145,7 @@ function EditReportForm({ report }: { report: Report }) {
           <form.Field name="title">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Report title</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.edit.titleLabel')}</FieldLabel>
                 <Input
                   id={field.name}
                   value={field.state.value}
@@ -175,7 +178,7 @@ function EditReportForm({ report }: { report: Report }) {
           <form.Field name="date">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Report date</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.edit.dateLabel')}</FieldLabel>
                 <DatePicker
                   id={field.name}
                   value={field.state.value}
@@ -208,7 +211,7 @@ function EditReportForm({ report }: { report: Report }) {
           <form.Field name="doctorName">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Doctor's name</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.edit.doctorLabel')}</FieldLabel>
                 <Input
                   id={field.name}
                   value={field.state.value}
@@ -241,7 +244,7 @@ function EditReportForm({ report }: { report: Report }) {
           <form.Field name="notes">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Notes (optional)</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.edit.notesLabel')}</FieldLabel>
                 <Textarea
                   id={field.name}
                   value={field.state.value}
@@ -254,9 +257,8 @@ function EditReportForm({ report }: { report: Report }) {
           </form.Field>
         </FieldGroup>
 
-        {/* File replacement */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium">Attachment</span>
+          <span className="text-sm font-medium">{t('reports.edit.attachmentLabel')}</span>
           {report.files.length > 0 && !pendingFile && (
             <div className="flex items-center justify-between gap-3 rounded-lg bg-muted px-3 py-2">
               <span className="truncate text-sm text-muted-foreground">{report.files[0]!.name}</span>
@@ -267,7 +269,7 @@ function EditReportForm({ report }: { report: Report }) {
                 className="shrink-0"
                 onClick={() => fileInputRef.current?.click()}
               >
-                Replace file
+                {t('reports.edit.replaceFile')}
               </Button>
             </div>
           )}
@@ -285,7 +287,7 @@ function EditReportForm({ report }: { report: Report }) {
                       const compressed = await compressImageIfNeeded(pendingFile)
                       setIsCompressing(false)
                       await replaceFileMutation.mutateAsync(compressed)
-                      toast.success('File replaced.')
+                      toast.success(t('reports.edit.fileReplaceSuccess'))
                       setPendingFile(null)
                     } catch {
                       setIsCompressing(false)
@@ -294,7 +296,7 @@ function EditReportForm({ report }: { report: Report }) {
                   }}
                 >
                   {(isCompressing || replaceFileMutation.isPending) && <LoaderCircleIcon className="size-4 animate-spin" />}
-                  {isCompressing ? 'Compressing…' : replaceFileMutation.isPending ? 'Uploading…' : 'Upload'}
+                  {isCompressing ? t('reports.edit.compressing') : replaceFileMutation.isPending ? t('reports.edit.uploading') : t('reports.edit.uploadButton')}
                 </Button>
                 <Button
                   type="button"
@@ -330,8 +332,8 @@ function EditReportForm({ report }: { report: Report }) {
               className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border p-6 text-muted-foreground transition-colors hover:border-ring hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <UploadIcon className="size-6" />
-              <span className="text-sm">Tap to attach a file</span>
-              <span className="text-xs">PDF, JPG, PNG up to 10 MB</span>
+              <span className="text-sm">{t('reports.edit.tapToAttach')}</span>
+              <span className="text-xs">{t('reports.edit.fileTypesHelp')}</span>
             </button>
           )}
         </div>
@@ -346,7 +348,7 @@ function EditReportForm({ report }: { report: Report }) {
                 className="w-full sm:w-auto"
                 disabled={!canSubmit || !!isSubmitting}
               >
-                {isSubmitting ? 'Saving…' : 'Save changes'}
+                {isSubmitting ? t('common.saving') : t('reports.edit.saveChanges')}
               </Button>
             )}
           </form.Subscribe>
@@ -358,7 +360,7 @@ function EditReportForm({ report }: { report: Report }) {
               'w-full sm:w-auto',
             )}
           >
-            Cancel
+            {t('common.cancel')}
           </Link>
         </div>
       </form>
@@ -367,6 +369,7 @@ function EditReportForm({ report }: { report: Report }) {
 }
 
 export function EditReportPage({ id }: { id: string }) {
+  const { t } = useTranslation()
   const { data: report, isLoading, isError, error } = useReport(id)
 
   if (isLoading) return <EditReportPageSkeleton />
@@ -376,9 +379,9 @@ export function EditReportPage({ id }: { id: string }) {
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-2xl mx-auto">
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Couldn't load this report</AlertTitle>
+          <AlertTitle>{t('reports.edit.loadError')}</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(error)} Please try again.
+            {getErrorMessage(error)} {t('common.tryAgain')}
           </AlertDescription>
         </Alert>
       </div>
@@ -396,10 +399,10 @@ export function EditReportPage({ id }: { id: string }) {
         )}
       >
         <ArrowLeftIcon className="size-4" />
-        Back to report
+        {t('reports.edit.backLink')}
       </Link>
 
-      <h1 className="text-2xl font-medium">Edit report</h1>
+      <h1 className="text-2xl font-medium">{t('reports.edit.heading')}</h1>
 
       <EditReportForm report={report} />
     </div>

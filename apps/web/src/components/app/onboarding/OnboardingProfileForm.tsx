@@ -1,7 +1,8 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
-import { onboardingProfileSchema } from '#/lib/onboarding-schemas'
+import { useTranslation } from 'react-i18next'
+import { createOnboardingSchemas } from '#/lib/onboarding-schemas'
 import { getErrorMessage } from '#/api/client'
 import { useUser, useUpdateProfileMutation } from '#/hooks/user'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
@@ -13,9 +14,11 @@ import { DatePicker } from '#/components/shared/DatePicker'
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
 export function OnboardingProfileForm() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: user } = useUser()
   const updateProfile = useUpdateProfileMutation()
+  const { onboardingProfileSchema } = createOnboardingSchemas(t)
 
   const form = useForm({
     defaultValues: { dob: '', bloodType: '', gender: '' },
@@ -43,7 +46,7 @@ export function OnboardingProfileForm() {
       {updateProfile.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
           <AlertDescription>{getErrorMessage(updateProfile.error)}</AlertDescription>
         </Alert>
       )}
@@ -52,13 +55,13 @@ export function OnboardingProfileForm() {
         <form.Field name="dob">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Date of birth</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('onboarding.profile.dobLabel')}</FieldLabel>
               <DatePicker
                 id={field.name}
                 value={field.state.value}
                 onChange={(value) => field.handleChange(value)}
                 onBlur={field.handleBlur}
-                placeholder="Select your date of birth"
+                placeholder={t('onboarding.profile.dobPlaceholder')}
                 disableFuture
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                 aria-describedby={
@@ -80,7 +83,7 @@ export function OnboardingProfileForm() {
         <form.Field name="bloodType">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Blood type</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('bloodType.label')}</FieldLabel>
               <NativeSelect
                 id={field.name}
                 value={field.state.value}
@@ -95,7 +98,7 @@ export function OnboardingProfileForm() {
                 }
               >
                 <NativeSelectOption value="" disabled>
-                  Select blood type
+                  {t('bloodType.placeholder')}
                 </NativeSelectOption>
                 {BLOOD_TYPES.map((bt) => (
                   <NativeSelectOption key={bt} value={bt}>
@@ -116,7 +119,7 @@ export function OnboardingProfileForm() {
         <form.Field name="gender">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('gender.label')}</FieldLabel>
               <NativeSelect
                 id={field.name}
                 value={field.state.value}
@@ -131,12 +134,12 @@ export function OnboardingProfileForm() {
                 }
               >
                 <NativeSelectOption value="" disabled>
-                  Select gender
+                  {t('gender.placeholder')}
                 </NativeSelectOption>
-                <NativeSelectOption value="male">Male</NativeSelectOption>
-                <NativeSelectOption value="female">Female</NativeSelectOption>
-                <NativeSelectOption value="other">Other</NativeSelectOption>
-                <NativeSelectOption value="prefer_not_to_say">Prefer not to say</NativeSelectOption>
+                <NativeSelectOption value="male">{t('gender.male')}</NativeSelectOption>
+                <NativeSelectOption value="female">{t('gender.female')}</NativeSelectOption>
+                <NativeSelectOption value="other">{t('gender.other')}</NativeSelectOption>
+                <NativeSelectOption value="prefer_not_to_say">{t('gender.preferNotToSay')}</NativeSelectOption>
               </NativeSelect>
               {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
                 <FieldError
@@ -157,7 +160,7 @@ export function OnboardingProfileForm() {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Saving…' : 'Continue'}
+            {isSubmitting ? t('common.saving') : t('common.continue')}
           </Button>
         )}
       </form.Subscribe>

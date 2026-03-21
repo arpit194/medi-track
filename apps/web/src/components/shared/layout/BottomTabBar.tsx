@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
 import type { NavItem } from '#/lib/nav'
 import { NAV_ITEMS } from '#/lib/nav'
@@ -19,6 +20,8 @@ function TabItem({
   isActive: boolean
   onOpenSheet: () => void
 }) {
+  const { t } = useTranslation()
+  const label = t(item.labelKey)
   const baseClass = cn(
     'flex flex-1 flex-col items-center gap-1 py-2 min-h-14 justify-center transition-colors',
     isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
@@ -28,7 +31,7 @@ function TabItem({
     return (
       <button type="button" className={baseClass} onClick={onOpenSheet}>
         <item.icon className="size-5" />
-        <span className={cn('text-xs', isActive && 'font-medium')}>{item.label}</span>
+        <span className={cn('text-xs', isActive && 'font-medium')}>{label}</span>
       </button>
     )
   }
@@ -36,12 +39,13 @@ function TabItem({
   return (
     <Link to={item.to} className={baseClass}>
       <item.icon className="size-5" />
-      <span className={cn('text-xs', isActive && 'font-medium')}>{item.label}</span>
+      <span className={cn('text-xs', isActive && 'font-medium')}>{label}</span>
     </Link>
   )
 }
 
 export function BottomTabBar() {
+  const { t } = useTranslation()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const [openSheet, setOpenSheet] = useState<string | null>(null)
 
@@ -69,7 +73,7 @@ export function BottomTabBar() {
       <Sheet open={openSheet !== null} onOpenChange={(open) => !open && setOpenSheet(null)}>
         <SheetContent side="bottom" showCloseButton={false} className="pb-safe rounded-t-xl">
           <SheetHeader>
-            <SheetTitle>{activeSheetItem?.label}</SheetTitle>
+            <SheetTitle>{activeSheetItem ? t(activeSheetItem.labelKey) : ''}</SheetTitle>
           </SheetHeader>
           <div className="flex flex-col pb-4">
             {activeSheetItem?.children?.map((child) => (
@@ -84,7 +88,7 @@ export function BottomTabBar() {
                     : 'text-foreground hover:bg-muted',
                 )}
               >
-                {child.label}
+                {t(child.labelKey)}
               </Link>
             ))}
           </div>

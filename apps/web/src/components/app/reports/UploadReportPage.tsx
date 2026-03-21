@@ -3,6 +3,7 @@ import { useNavigate, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, LoaderCircleIcon, OctagonXIcon, UploadIcon, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useForm } from '@tanstack/react-form'
+import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
 import { buttonVariants } from '#/components/ui/button'
 import { Button } from '#/components/ui/button'
@@ -14,11 +15,12 @@ import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, C
 import { DatePicker } from '#/components/shared/DatePicker'
 import { useCreateReportMutation, useReportFilters } from '#/hooks/reports'
 import { getErrorMessage } from '#/api/client'
-import { uploadReportSchema } from '#/lib/report-schemas'
+import { createReportSchemas } from '#/lib/report-schemas'
 import { compressImageIfNeeded } from '#/lib/compress-image'
 import { REPORT_TYPE_SUGGESTIONS } from '#/api/reports'
 
 export function UploadReportPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const createMutation = useCreateReportMutation()
   const { data: filters } = useReportFilters()
@@ -27,6 +29,7 @@ export function UploadReportPage() {
   const [file, setFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
   const [isCompressing, setIsCompressing] = useState(false)
+  const { uploadReportSchema } = createReportSchemas(t)
 
   const form = useForm({
     defaultValues: {
@@ -39,7 +42,7 @@ export function UploadReportPage() {
     validators: { onChange: uploadReportSchema },
     onSubmit: async ({ value }) => {
       if (!file) {
-        setFileError('Please attach a file for this report.')
+        setFileError(t('reports.upload.fileRequired'))
         return
       }
       try {
@@ -47,7 +50,7 @@ export function UploadReportPage() {
         const compressed = await compressImageIfNeeded(file!)
         setIsCompressing(false)
         await createMutation.mutateAsync({ ...value, file: compressed })
-        toast.success('Report uploaded successfully.')
+        toast.success(t('reports.upload.uploadSuccess'))
         navigate({ to: '/reports' })
       } catch {
         setIsCompressing(false)
@@ -74,17 +77,17 @@ export function UploadReportPage() {
         className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), '-ml-2 w-fit')}
       >
         <ArrowLeftIcon className="size-4" />
-        All reports
+        {t('reports.upload.backLink')}
       </Link>
 
-      <h1 className="text-2xl font-medium">Upload a report</h1>
+      <h1 className="text-2xl font-medium">{t('reports.upload.heading')}</h1>
 
       {createMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('reports.upload.uploadError')}</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(createMutation.error)} Please try again.
+            {getErrorMessage(createMutation.error)} {t('common.tryAgain')}
           </AlertDescription>
         </Alert>
       )}
@@ -102,7 +105,7 @@ export function UploadReportPage() {
           <form.Field name="type">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Report type</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.upload.typeLabel')}</FieldLabel>
                 <Combobox
                   value={field.state.value}
                   onValueChange={(v) => field.handleChange(v ?? '')}
@@ -111,7 +114,7 @@ export function UploadReportPage() {
                     id={field.name}
                     showTrigger
                     showClear
-                    placeholder="e.g. Blood Test"
+                    placeholder={t('reports.upload.typePlaceholder')}
                     className="h-11 w-full"
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
@@ -129,7 +132,7 @@ export function UploadReportPage() {
                           {type}
                         </ComboboxItem>
                       ))}
-                      <ComboboxEmpty>Press Enter to use your own type</ComboboxEmpty>
+                      <ComboboxEmpty>{t('reports.upload.typeCustomHint')}</ComboboxEmpty>
                     </ComboboxList>
                   </ComboboxContent>
                 </Combobox>
@@ -146,13 +149,13 @@ export function UploadReportPage() {
           <form.Field name="title">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Report title</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.upload.titleLabel')}</FieldLabel>
                 <Input
                   id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  placeholder="e.g. Full Blood Count"
+                  placeholder={t('reports.upload.titlePlaceholder')}
                   className="h-11"
                   aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                   aria-describedby={
@@ -174,13 +177,13 @@ export function UploadReportPage() {
           <form.Field name="date">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Report date</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.upload.dateLabel')}</FieldLabel>
                 <DatePicker
                   id={field.name}
                   value={field.state.value}
                   onChange={field.handleChange}
                   onBlur={field.handleBlur}
-                  placeholder="Select date"
+                  placeholder={t('reports.upload.datePlaceholder')}
                   disableFuture
                   aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                   aria-describedby={
@@ -202,13 +205,13 @@ export function UploadReportPage() {
           <form.Field name="doctorName">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Doctor's name</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.upload.doctorLabel')}</FieldLabel>
                 <Input
                   id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  placeholder="e.g. Dr. Sarah Mitchell"
+                  placeholder={t('reports.upload.doctorPlaceholder')}
                   className="h-11"
                   aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
                   aria-describedby={
@@ -230,13 +233,13 @@ export function UploadReportPage() {
           <form.Field name="notes">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Notes (optional)</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('reports.upload.notesLabel')}</FieldLabel>
                 <Textarea
                   id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  placeholder="Any observations, instructions, or context from the doctor."
+                  placeholder={t('reports.upload.notesPlaceholder')}
                   rows={4}
                 />
               </Field>
@@ -244,17 +247,16 @@ export function UploadReportPage() {
           </form.Field>
         </FieldGroup>
 
-        {/* File upload */}
         <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium">Attachment</span>
+          <span className="text-sm font-medium">{t('reports.upload.attachmentLabel')}</span>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="flex flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border p-6 text-muted-foreground transition-colors hover:border-ring hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <UploadIcon className="size-6" />
-            <span className="text-sm">Tap to attach files</span>
-            <span className="text-xs">PDF, JPG, PNG up to 10 MB each</span>
+            <span className="text-sm">{t('reports.upload.tapToAttach')}</span>
+            <span className="text-xs">{t('reports.upload.fileTypesHelp')}</span>
           </button>
           <input
             ref={fileInputRef}
@@ -294,7 +296,7 @@ export function UploadReportPage() {
                 disabled={!canSubmit || !!isSubmitting}
               >
                 {(isCompressing || !!isSubmitting) && <LoaderCircleIcon className="size-4 animate-spin" />}
-                {isCompressing ? 'Compressing…' : isSubmitting ? 'Uploading…' : 'Upload report'}
+                {isCompressing ? t('reports.upload.compressing') : isSubmitting ? t('reports.upload.uploading') : t('reports.upload.submitButton')}
               </Button>
             )}
           </form.Subscribe>
@@ -302,7 +304,7 @@ export function UploadReportPage() {
             to="/reports"
             className={cn(buttonVariants({ variant: 'outline' }), 'w-full sm:w-auto')}
           >
-            Cancel
+            {t('common.cancel')}
           </Link>
         </div>
       </form>

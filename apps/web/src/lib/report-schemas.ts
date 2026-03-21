@@ -1,11 +1,16 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
 
-export const uploadReportSchema = z.object({
-  type: z.string().min(1, 'Please select a report type.'),
-  title: z.string().min(1, 'Please enter a title for this report.'),
-  date: z.string().min(1, 'Please enter the date shown on the report.'),
-  doctorName: z.string().min(1, "Please enter the doctor's name."),
-  notes: z.string(),
-})
+export function createReportSchemas(t: TFunction) {
+  const uploadReportSchema = z.object({
+    type: z.string().min(1, t('validation.reportTypeRequired')),
+    title: z.string().min(1, t('validation.reportTitleRequired')),
+    date: z.string().min(1, t('validation.reportDateRequired')),
+    doctorName: z.string().min(1, t('validation.doctorNameRequired')),
+    notes: z.string(),
+  })
 
-export const editReportSchema = uploadReportSchema
+  const editReportSchema = uploadReportSchema
+
+  return { uploadReportSchema, editReportSchema }
+}

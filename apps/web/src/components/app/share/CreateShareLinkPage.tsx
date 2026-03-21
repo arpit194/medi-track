@@ -9,7 +9,8 @@ import {
   ChevronLeftIcon,
 } from 'lucide-react'
 import { format, parseISO, isAfter, isBefore, isEqual } from 'date-fns'
-import { createShareLinkSchema } from '#/lib/share-schemas'
+import { useTranslation } from 'react-i18next'
+import { createShareSchemas } from '#/lib/share-schemas'
 import { getErrorMessage } from '#/api/client'
 import { useCreateShareLinkMutation } from '#/hooks/share'
 import { useReports, useReportFilters } from '#/hooks/reports'
@@ -38,13 +39,6 @@ import { Skeleton } from '#/components/ui/skeleton'
 import { cn } from '#/lib/utils'
 import type { Report, ShareLink } from '@medi-track/types'
 
-const EXPIRY_OPTIONS = [
-  { value: '24h', label: '24 hours' },
-  { value: '7d', label: '7 days' },
-  { value: '30d', label: '30 days' },
-  { value: 'one_time', label: 'One-time view' },
-] as const
-
 type MonthGroup = { month: string; reports: Report[] }
 type YearGroup = { year: string; months: MonthGroup[] }
 
@@ -68,6 +62,7 @@ function groupReports(reports: Report[]): YearGroup[] {
 }
 
 function CreatedLinkCard({ link }: { link: ShareLink }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const shareUrl = `${window.location.origin}/s/${link.token}`
   const navigate = useNavigate()
@@ -75,17 +70,16 @@ function CreatedLinkCard({ link }: { link: ShareLink }) {
   function copyLink() {
     void navigator.clipboard.writeText(shareUrl)
     setCopied(true)
-    toast.success('Link copied to clipboard')
+    toast.success(t('share.create.copied'))
     setTimeout(() => setCopied(false), 2000)
   }
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1 text-center">
-        <p className="text-lg font-medium">Your link is ready</p>
+        <p className="text-lg font-medium">{t('share.create.successHeading')}</p>
         <p className="text-muted-foreground leading-relaxed">
-          Share this link with your doctor or specialist. It works without them
-          needing an account.
+          {t('share.create.successDescription')}
         </p>
       </div>
       <Card>
@@ -110,11 +104,10 @@ function CreatedLinkCard({ link }: { link: ShareLink }) {
             </button>
           </div>
           <p className="text-sm text-muted-foreground">
-            {link.reportIds.length}{' '}
-            {link.reportIds.length === 1 ? 'report' : 'reports'} shared
+            {t('common.reportCount_other', { count: link.reportIds.length })}{' '}
             {link.expiresIn === 'one_time'
-              ? ' · One-time view only'
-              : ` · Expires ${format(new Date(link.expiresAt), 'd MMM yyyy')}`}
+              ? `· ${t('share.create.oneTimeOnly')}`
+              : `· ${t('share.create.expiresOn', { date: format(new Date(link.expiresAt), 'd MMM yyyy') })}`}
           </p>
         </CardContent>
       </Card>
@@ -125,7 +118,7 @@ function CreatedLinkCard({ link }: { link: ShareLink }) {
           ) : (
             <CopyIcon className="size-4" />
           )}
-          {copied ? 'Copied!' : 'Copy link'}
+          {copied ? t('share.create.copied') : t('share.copyLink')}
         </Button>
         <Button
           variant="outline"
@@ -133,7 +126,7 @@ function CreatedLinkCard({ link }: { link: ShareLink }) {
           className="w-full"
           onClick={() => void navigate({ to: '/share' })}
         >
-          View all links
+          {t('share.create.viewAllLinks')}
         </Button>
       </div>
     </div>
@@ -147,6 +140,7 @@ type ReportPickerProps = {
 }
 
 function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { type: typeFilter = '', dateFrom, dateTo } = useSearch({ from: '/_app/share/new' })
   const [search, setSearch] = useState('')
@@ -204,7 +198,7 @@ function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
 
   return (
     <Field>
-      <FieldLabel>Reports to share</FieldLabel>
+      <FieldLabel>{t('share.create.reportsField')}</FieldLabel>
 
       {error && (
         <FieldError id="reportIds-error" errors={[{ message: error }]} />
@@ -220,21 +214,20 @@ function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
 
       {!isLoading && reportsData?.data.length === 0 && (
         <p className="text-sm text-muted-foreground py-4 text-center">
-          You haven't uploaded any reports yet.{' '}
+          {t('share.create.noReportsUploaded')}{' '}
           <Link to="/reports/upload" className="underline underline-offset-4 text-foreground">
-            Upload one first.
+            {t('share.create.uploadFirst')}
           </Link>
         </p>
       )}
 
       {!isLoading && (reportsData?.data.length ?? 0) > 0 && (
         <div className="flex flex-col gap-4">
-          {/* Filters */}
           <div className="flex flex-col gap-2">
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by title or doctor name…"
+              placeholder={t('share.create.searchPlaceholder')}
               className="h-11"
             />
             <div className="grid grid-cols-3 gap-2">
@@ -244,29 +237,28 @@ function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
                 aria-label="Filter by type"
                 className="w-full [&_select]:h-full"
               >
-                <NativeSelectOption value="">All types</NativeSelectOption>
-                {filters?.types.map((t) => (
-                  <NativeSelectOption key={t} value={t}>{t}</NativeSelectOption>
+                <NativeSelectOption value="">{t('common.allTypes')}</NativeSelectOption>
+                {filters?.types.map((type) => (
+                  <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>
                 ))}
               </NativeSelect>
               <DatePicker
                 value={dateFrom ?? filters?.dateRange.min ?? ''}
                 onChange={(v) => setQueryFilter({ dateFrom: v || undefined })}
-                placeholder="From date"
+                placeholder={t('share.create.fromDate')}
                 fromDate={filters?.dateRange.min ?? undefined}
                 toDate={dateTo ?? filters?.dateRange.max ?? undefined}
               />
               <DatePicker
                 value={dateTo ?? filters?.dateRange.max ?? ''}
                 onChange={(v) => setQueryFilter({ dateTo: v || undefined })}
-                placeholder="To date"
+                placeholder={t('share.create.toDate')}
                 fromDate={dateFrom ?? filters?.dateRange.min ?? undefined}
                 toDate={filters?.dateRange.max ?? undefined}
               />
             </div>
           </div>
 
-          {/* Select all row */}
           <button
             type="button"
             onClick={toggleSelectAll}
@@ -279,17 +271,17 @@ function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
               aria-hidden
             />
             <span className="text-sm font-medium">
-              {allVisibleSelected ? 'Deselect all' : 'Select all'}
-              {hasFilters ? ' matching' : ''}
+              {allVisibleSelected
+                ? hasFilters ? t('share.create.deselectAll') : t('share.create.deselectAll')
+                : hasFilters ? t('share.create.selectAllMatching') : t('share.create.selectAll')}
             </span>
             {selectedIds.length > 0 && (
               <span className="ml-auto text-sm text-muted-foreground">
-                {selectedIds.length} selected
+                {t('share.create.selectedCount', { count: selectedIds.length })}
               </span>
             )}
           </button>
 
-          {/* Timeline grouped list */}
           {groups.map(({ year, months }) => (
             <div key={year} className="flex flex-col">
               <div className="flex items-center gap-3 py-1">
@@ -358,7 +350,7 @@ function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
 
           {visible.length === 0 && typeFilter && (
             <p className="text-sm text-muted-foreground py-4 text-center">
-              No reports for this type.
+              {t('share.create.noReportsForType')}
             </p>
           )}
         </div>
@@ -368,7 +360,16 @@ function ReportPicker({ selectedIds, onChange, error }: ReportPickerProps) {
 }
 
 export function CreateShareLinkPage() {
+  const { t } = useTranslation()
   const createMutation = useCreateShareLinkMutation()
+  const { createShareLinkSchema } = createShareSchemas(t)
+
+  const EXPIRY_OPTIONS = [
+    { value: '24h', label: t('expiry.24h') },
+    { value: '7d', label: t('expiry.7d') },
+    { value: '30d', label: t('expiry.30d') },
+    { value: 'one_time', label: t('expiry.one_time') },
+  ] as const
 
   const form = useForm({
     defaultValues: {
@@ -414,7 +415,7 @@ export function CreateShareLinkPage() {
         >
           <ChevronLeftIcon className="size-4" />
         </Link>
-        <h1 className="font-serif text-2xl font-medium">Create share link</h1>
+        <h1 className="font-serif text-2xl font-medium">{t('share.create.heading')}</h1>
       </div>
 
       <form
@@ -429,7 +430,7 @@ export function CreateShareLinkPage() {
         {createMutation.isError && (
           <Alert variant="destructive">
             <OctagonXIcon className="size-4" />
-            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertTitle>{t('share.create.error')}</AlertTitle>
             <AlertDescription>
               {getErrorMessage(createMutation.error)}
             </AlertDescription>
@@ -440,13 +441,13 @@ export function CreateShareLinkPage() {
           <form.Field name="label">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Link name</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('share.create.labelField')}</FieldLabel>
                 <Input
                   id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  placeholder="e.g. For Dr. Patel — cardiology review"
+                  placeholder={t('share.create.labelPlaceholder')}
                   className="h-11"
                   aria-invalid={
                     field.state.meta.isTouched && !field.state.meta.isValid
@@ -474,7 +475,7 @@ export function CreateShareLinkPage() {
           <form.Field name="expiresIn">
             {(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Link expires after</FieldLabel>
+                <FieldLabel htmlFor={field.name}>{t('share.create.expiryField')}</FieldLabel>
                 <Select
                   value={field.state.value}
                   onValueChange={(v) => { if (v) field.handleChange(v) }}
@@ -519,7 +520,7 @@ export function CreateShareLinkPage() {
               className="w-full"
               disabled={!canSubmit || !!isSubmitting}
             >
-              {isSubmitting ? 'Creating link…' : 'Create share link'}
+              {isSubmitting ? t('share.create.creating') : t('share.create.submitButton')}
             </Button>
           )}
         </form.Subscribe>

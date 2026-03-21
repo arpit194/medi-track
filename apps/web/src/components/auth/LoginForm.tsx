@@ -1,7 +1,8 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
-import { loginSchema } from '#/lib/auth-schemas'
+import { useTranslation } from 'react-i18next'
+import { createAuthSchemas } from '#/lib/auth-schemas'
 import { getErrorMessage } from '#/api/client'
 import { useLoginMutation } from '#/hooks/auth'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
@@ -10,8 +11,10 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field
 import { Input } from '#/components/ui/input'
 
 export function LoginForm() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const loginMutation = useLoginMutation()
+  const { loginSchema } = createAuthSchemas(t)
 
   const form = useForm({
     defaultValues: { email: '', password: '' },
@@ -39,7 +42,7 @@ export function LoginForm() {
       {loginMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
           <AlertDescription>
             {getErrorMessage(loginMutation.error)}
           </AlertDescription>
@@ -50,14 +53,14 @@ export function LoginForm() {
         <form.Field name="email">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Email address</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.login.emailLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="email"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="you@example.com"
+                placeholder={t('auth.login.emailPlaceholder')}
                 autoComplete="email"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -80,14 +83,14 @@ export function LoginForm() {
         <form.Field name="password">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.login.passwordLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="password"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="Your password"
+                placeholder={t('auth.login.passwordPlaceholder')}
                 autoComplete="current-password"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -116,7 +119,7 @@ export function LoginForm() {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
+            {isSubmitting ? t('auth.login.signingIn') : t('auth.login.signIn')}
           </Button>
         )}
       </form.Subscribe>

@@ -6,6 +6,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { TooltipProvider } from '#/components/ui/tooltip'
 import { Toaster } from 'sonner'
 import '../styles.css'
+import '#/i18n'
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({

@@ -4,6 +4,7 @@ import { Route } from '#/routes/s/$token'
 import { usePublicShareView } from '#/hooks/share'
 import { format, parseISO, isAfter, isBefore, isEqual } from 'date-fns'
 import { FileIcon, ShieldIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
 import { Skeleton } from '#/components/ui/skeleton'
@@ -90,6 +91,7 @@ function SharedReportPageSkeleton() {
 }
 
 export function SharedReportPage() {
+  const { t } = useTranslation()
   const { token } = Route.useParams()
   const { type: typeFilter = '', dateFrom, dateTo, sortOrder } = useSearch({ from: '/s/$token' })
   const navigate = useNavigate()
@@ -134,10 +136,10 @@ export function SharedReportPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border px-4 py-4">
         <div className="mx-auto max-w-4xl flex items-center justify-between">
-          <span className="font-serif text-xl font-medium">MediTrack</span>
+          <span className="font-serif text-xl font-medium">{t('common.appName')}</span>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <ShieldIcon className="size-3.5" />
-            Shared securely
+            {t('share.public.sharedSecurely')}
           </div>
         </div>
       </header>
@@ -150,7 +152,7 @@ export function SharedReportPage() {
             <div className="flex size-14 items-center justify-center rounded-full bg-muted">
               <FileIcon className="size-6 text-muted-foreground" />
             </div>
-            <p className="text-lg font-medium">This link is no longer available</p>
+            <p className="text-lg font-medium">{t('share.public.unavailableHeading')}</p>
             <p className="text-muted-foreground leading-relaxed max-w-sm">{getErrorMessage(error)}</p>
           </div>
         )}
@@ -160,7 +162,7 @@ export function SharedReportPage() {
             <div className="flex flex-col gap-1">
               <h1 className="font-serif text-2xl font-medium">{data.label}</h1>
               <p className="text-sm text-muted-foreground">
-                Link expires {format(new Date(data.expiresAt), 'd MMM yyyy, HH:mm')}
+                {t('share.public.expiresAt', { datetime: format(new Date(data.expiresAt), 'd MMM yyyy, HH:mm') })}
               </p>
             </div>
 
@@ -171,9 +173,9 @@ export function SharedReportPage() {
                 aria-label="Filter by report type"
                 className="w-full [&_select]:h-11 [&_select]:w-full"
               >
-                <NativeSelectOption value="">All types</NativeSelectOption>
-                {types.map((t) => (
-                  <NativeSelectOption key={t} value={t}>{t}</NativeSelectOption>
+                <NativeSelectOption value="">{t('common.allTypes')}</NativeSelectOption>
+                {types.map((type) => (
+                  <NativeSelectOption key={type} value={type}>{type}</NativeSelectOption>
                 ))}
               </NativeSelect>
 
@@ -183,21 +185,21 @@ export function SharedReportPage() {
                 aria-label="Sort order"
                 className="w-full [&_select]:h-11 [&_select]:w-full"
               >
-                <NativeSelectOption value="desc">Newest first</NativeSelectOption>
-                <NativeSelectOption value="asc">Oldest first</NativeSelectOption>
+                <NativeSelectOption value="desc">{t('common.newestFirst')}</NativeSelectOption>
+                <NativeSelectOption value="asc">{t('common.oldestFirst')}</NativeSelectOption>
               </NativeSelect>
 
               <DatePicker
                 value={dateFrom ?? dateRange.min ?? ''}
                 onChange={(v) => setSearch({ dateFrom: v || undefined })}
-                placeholder="From date"
+                placeholder={t('share.create.fromDate')}
                 fromDate={dateRange.min}
                 toDate={dateTo ?? dateRange.max}
               />
               <DatePicker
                 value={dateTo ?? dateRange.max ?? ''}
                 onChange={(v) => setSearch({ dateTo: v || undefined })}
-                placeholder="To date"
+                placeholder={t('share.create.toDate')}
                 fromDate={dateFrom ?? dateRange.min}
                 toDate={dateRange.max}
               />
@@ -205,7 +207,7 @@ export function SharedReportPage() {
 
             {filtered.length === 0 && (
               <p className="text-muted-foreground py-8 text-center">
-                {hasFilters ? 'No reports match your filters.' : 'No reports are included in this link.'}
+                {hasFilters ? t('share.public.noReportsFiltered') : t('share.public.noReports')}
               </p>
             )}
 

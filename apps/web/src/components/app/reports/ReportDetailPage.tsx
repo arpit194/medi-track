@@ -3,6 +3,7 @@ import { useNavigate, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, CalendarIcon, UserIcon, FileTextIcon, OctagonXIcon, PencilIcon, EyeIcon, DownloadIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { buttonVariants } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
@@ -49,6 +50,7 @@ function ReportDetailPageSkeleton() {
 }
 
 export function ReportDetailPage({ id }: { id: string }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: report, isLoading, isError, error } = useReport(id)
   const deleteMutation = useDeleteReportMutation()
@@ -57,7 +59,7 @@ export function ReportDetailPage({ id }: { id: string }) {
   async function handleDelete() {
     try {
       await deleteMutation.mutateAsync(id)
-      toast.success('Report deleted.')
+      toast.success(t('reports.detail.deleteSuccess'))
       navigate({ to: '/reports' })
     } catch {
       // error shown via deleteMutation.isError
@@ -71,8 +73,8 @@ export function ReportDetailPage({ id }: { id: string }) {
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-4xl mx-auto">
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Couldn't load this report</AlertTitle>
-          <AlertDescription>{getErrorMessage(error)} Please try again.</AlertDescription>
+          <AlertTitle>{t('reports.detail.loadError')}</AlertTitle>
+          <AlertDescription>{getErrorMessage(error)} {t('common.tryAgain')}</AlertDescription>
         </Alert>
       </div>
     )
@@ -85,7 +87,7 @@ export function ReportDetailPage({ id }: { id: string }) {
         className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), '-ml-2 w-fit')}
       >
         <ArrowLeftIcon className="size-4" />
-        All reports
+        {t('reports.detail.backLink')}
       </Link>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -100,28 +102,27 @@ export function ReportDetailPage({ id }: { id: string }) {
             className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
           >
             <PencilIcon className="size-4" />
-            Edit
+            {t('common.edit')}
           </Link>
           <AlertDialog>
             <AlertDialogTrigger render={<Button variant="destructive" size="sm" />}>
-              Delete
+              {t('common.delete')}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete this report?</AlertDialogTitle>
+                <AlertDialogTitle>{t('reports.detail.deleteHeading')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently remove "{report.title}" and all its files. This cannot be
-                  undone.
+                  {t('reports.detail.deleteDescription', { title: report.title })}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Keep it</AlertDialogCancel>
+                <AlertDialogCancel>{t('reports.detail.keepIt')}</AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
                   onClick={handleDelete}
                   disabled={deleteMutation.isPending}
                 >
-                  {deleteMutation.isPending ? 'Deleting…' : 'Yes, delete'}
+                  {deleteMutation.isPending ? t('reports.detail.deleting') : t('reports.detail.confirmDelete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -132,16 +133,16 @@ export function ReportDetailPage({ id }: { id: string }) {
       {deleteMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Couldn't delete this report</AlertTitle>
+          <AlertTitle>{t('reports.detail.deleteError')}</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(deleteMutation.error)} Please try again.
+            {getErrorMessage(deleteMutation.error)} {t('common.tryAgain')}
           </AlertDescription>
         </Alert>
       )}
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-medium">Details</CardTitle>
+          <CardTitle className="text-base font-medium">{t('reports.detail.detailsHeading')}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-3 text-base">
@@ -169,7 +170,7 @@ export function ReportDetailPage({ id }: { id: string }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base font-medium">
-              Files ({report.files.length})
+              {t('reports.detail.filesHeading', { count: report.files.length })}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
@@ -183,7 +184,7 @@ export function ReportDetailPage({ id }: { id: string }) {
                     onClick={() => setViewingFile(file)}
                   >
                     <EyeIcon className="size-4" />
-                    View
+                    {t('reports.detail.view')}
                   </Button>
                   <Button
                     variant="outline"
@@ -199,7 +200,7 @@ export function ReportDetailPage({ id }: { id: string }) {
                     }}
                   >
                     <DownloadIcon className="size-4" />
-                    Download
+                    {t('reports.detail.download')}
                   </Button>
                 </div>
               </div>

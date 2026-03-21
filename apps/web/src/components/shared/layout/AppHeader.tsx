@@ -1,5 +1,6 @@
 import { Link, useRouter, useRouterState } from '@tanstack/react-router'
 import { ChevronLeftIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getPageTitle } from '#/lib/nav'
 import { Avatar, AvatarFallback } from '#/components/ui/avatar'
 import { Button } from '#/components/ui/button'
@@ -12,25 +13,24 @@ function getInitials(name: string) {
 }
 
 export function AppHeader() {
+  const { t } = useTranslation()
   const router = useRouter()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const historyIdx = useRouterState({ select: (s) => s.location.state.__TSR_index })
-  const title = getPageTitle(pathname)
+  const title = getPageTitle(pathname, t)
   const { data: user } = useUser()
   const initials = user ? getInitials(user.name) : ''
   const canGoBack = historyIdx > 0
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
-      {/* Brand — mobile only */}
       <Link
         to="/dashboard"
         className="font-serif text-lg font-semibold text-primary md:hidden"
       >
-        MediTrack
+        {t('common.appName')}
       </Link>
 
-      {/* Back + title — desktop */}
       <div className="hidden items-center gap-1 md:flex">
         {canGoBack && (
           <Button

@@ -1,6 +1,7 @@
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
-import { resetPasswordSchema } from '#/lib/auth-schemas'
+import { useTranslation } from 'react-i18next'
+import { createAuthSchemas } from '#/lib/auth-schemas'
 import { getErrorMessage } from '#/api/client'
 import { useResetPasswordMutation } from '#/hooks/auth'
 import { useNavigate } from '@tanstack/react-router'
@@ -19,8 +20,10 @@ type Props = {
 }
 
 export function ResetPasswordForm({ token }: Props) {
+  const { t } = useTranslation()
   const resetPasswordMutation = useResetPasswordMutation()
   const navigate = useNavigate()
+  const { resetPasswordSchema } = createAuthSchemas(t)
 
   const form = useForm({
     defaultValues: { password: '', confirmPassword: '' },
@@ -51,7 +54,7 @@ export function ResetPasswordForm({ token }: Props) {
       {resetPasswordMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
           <AlertDescription>
             {getErrorMessage(resetPasswordMutation.error)}
           </AlertDescription>
@@ -62,7 +65,7 @@ export function ResetPasswordForm({ token }: Props) {
         <form.Field name="password">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.resetPassword.newPasswordLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="password"
@@ -97,7 +100,7 @@ export function ResetPasswordForm({ token }: Props) {
         <form.Field name="confirmPassword">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Confirm new password</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.resetPassword.confirmPasswordLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="password"
@@ -140,7 +143,7 @@ export function ResetPasswordForm({ token }: Props) {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Saving…' : 'Set new password'}
+            {isSubmitting ? t('common.saving') : t('auth.resetPassword.setNewPassword')}
           </Button>
         )}
       </form.Subscribe>

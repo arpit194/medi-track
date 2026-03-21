@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { format, startOfMonth } from 'date-fns'
 import { gsap } from 'gsap'
 import { ArrowRightIcon, ClockIcon, FileTextIcon, TagsIcon, UploadIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '#/components/ui/badge'
 import { buttonVariants } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '#/components/ui/card'
@@ -12,11 +13,11 @@ import { useReports, useReportFilters } from '#/hooks/reports'
 import { useUser } from '#/hooks/user'
 import type { Report } from '@medi-track/types'
 
-function greeting() {
+function greetingKey(): 'dashboard.greetingMorning' | 'dashboard.greetingAfternoon' | 'dashboard.greetingEvening' {
   const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (h < 12) return 'dashboard.greetingMorning'
+  if (h < 18) return 'dashboard.greetingAfternoon'
+  return 'dashboard.greetingEvening'
 }
 
 function AnimatedNumber({ value }: { value: number }) {
@@ -105,6 +106,7 @@ function RecentReportRowSkeleton() {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const today = new Date()
   const monthStart = format(startOfMonth(today), 'yyyy-MM-dd')
   const todayStr = format(today, 'yyyy-MM-dd')
@@ -119,61 +121,57 @@ export function DashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-4xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col gap-1">
         {user ? (
-          <h1 className="text-2xl font-medium">{greeting()}, {firstName}</h1>
+          <h1 className="text-2xl font-medium">{t(greetingKey())}, {firstName}</h1>
         ) : (
           <Skeleton className="h-8 w-56" />
         )}
-        <p className="text-sm text-muted-foreground">Here's a summary of your medical records.</p>
+        <p className="text-sm text-muted-foreground">{t('dashboard.subtitle')}</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         <StatCard
           icon={FileTextIcon}
-          label="Total reports"
+          label={t('dashboard.totalReports')}
           value={recentData?.total ?? 0}
           loading={recentLoading}
         />
         <StatCard
           icon={ClockIcon}
-          label="This month"
+          label={t('dashboard.thisMonth')}
           value={monthData?.total ?? 0}
           loading={monthLoading}
         />
         <StatCard
           icon={TagsIcon}
-          label="Report types"
+          label={t('dashboard.reportTypes')}
           value={filters?.types.length ?? 0}
           loading={filtersLoading}
         />
       </div>
 
-      {/* Quick actions */}
       <div className="flex flex-wrap gap-3">
         <Link to="/reports/upload" className={cn(buttonVariants(), 'gap-2')}>
           <UploadIcon className="size-4" />
-          Upload a report
+          {t('dashboard.uploadReport')}
         </Link>
         <Link to="/timeline" className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}>
           <ClockIcon className="size-4" />
-          View timeline
+          {t('dashboard.viewTimeline')}
         </Link>
       </div>
 
-      {/* Recent reports */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent reports</CardTitle>
+          <CardTitle>{t('dashboard.recentReports')}</CardTitle>
           {!recentLoading && recentReports.length > 0 && (
             <CardAction>
               <Link
                 to="/reports"
                 className="text-sm text-primary hover:underline"
               >
-                View all
+                {t('dashboard.viewAll')}
               </Link>
             </CardAction>
           )}
@@ -189,9 +187,9 @@ export function DashboardPage() {
 
           {!recentLoading && recentReports.length === 0 && (
             <div className="flex flex-col items-center gap-3 py-8 text-center">
-              <p className="text-sm text-muted-foreground">No reports yet. Upload your first one to get started.</p>
+              <p className="text-sm text-muted-foreground">{t('dashboard.noReports')}</p>
               <Link to="/reports/upload" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-                Upload a report
+                {t('dashboard.uploadFirst')}
               </Link>
             </div>
           )}

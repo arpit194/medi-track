@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '#/components/ui/alert-dialog'
 import { Button } from '#/components/ui/button'
 
@@ -7,22 +8,24 @@ type Props = {
 }
 
 export function RevokeShareLinkButton({ onConfirm, isLoading }: Props) {
+  const { t } = useTranslation()
+
   return (
     <AlertDialog>
       <AlertDialogTrigger render={<Button variant="ghost" size="sm" disabled={isLoading} />}>
-        Revoke
+        {t('share.revokeButton')}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Revoke this link?</AlertDialogTitle>
+          <AlertDialogTitle>{t('share.revoke.heading')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Anyone with this link will no longer be able to view the shared reports. This cannot be undone.
+            {t('share.revoke.description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Keep it</AlertDialogCancel>
+          <AlertDialogCancel>{t('share.revoke.keepIt')}</AlertDialogCancel>
           <AlertDialogAction variant="destructive" onClick={onConfirm}>
-            Yes, revoke
+            {t('share.revoke.confirm')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

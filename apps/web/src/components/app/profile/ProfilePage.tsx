@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { OctagonXIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { User } from '@medi-track/types'
 import { getErrorMessage } from '#/api/client'
 import { useUser } from '#/hooks/user'
@@ -43,6 +44,8 @@ function ProfilePageSkeleton() {
 }
 
 function ProfilePageContent({ user }: { user: User }) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-2xl mx-auto">
       <div className="flex items-center gap-4">
@@ -55,7 +58,7 @@ function ProfilePageContent({ user }: { user: User }) {
           <p className="text-xl font-medium truncate">{user.name}</p>
           <p className="text-base text-muted-foreground truncate">{user.email}</p>
           <p className="text-sm text-muted-foreground">
-            Member since {format(new Date(user.createdAt), 'MMMM yyyy')}
+            {t('profile.memberSince', { date: format(new Date(user.createdAt), 'MMMM yyyy') })}
           </p>
         </div>
       </div>
@@ -64,7 +67,7 @@ function ProfilePageContent({ user }: { user: User }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-medium">Medical information</CardTitle>
+          <CardTitle className="text-base font-medium">{t('profile.medicalInfo')}</CardTitle>
         </CardHeader>
         <CardContent>
           <ProfileForm user={user} />
@@ -75,6 +78,7 @@ function ProfilePageContent({ user }: { user: User }) {
 }
 
 export function ProfilePage() {
+  const { t } = useTranslation()
   const { data: user, isLoading, isError, error } = useUser()
 
   if (isLoading) return <ProfilePageSkeleton />
@@ -84,8 +88,8 @@ export function ProfilePage() {
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-2xl mx-auto">
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Couldn't load your profile</AlertTitle>
-          <AlertDescription>{getErrorMessage(error)} Please try again.</AlertDescription>
+          <AlertTitle>{t('profile.loadError')}</AlertTitle>
+          <AlertDescription>{getErrorMessage(error)} {t('common.tryAgain')}</AlertDescription>
         </Alert>
       </div>
     )

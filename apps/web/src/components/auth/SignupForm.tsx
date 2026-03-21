@@ -1,7 +1,8 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { OctagonXIcon } from 'lucide-react'
-import { signupSchema } from '#/lib/auth-schemas'
+import { useTranslation } from 'react-i18next'
+import { createAuthSchemas } from '#/lib/auth-schemas'
 import { getErrorMessage } from '#/api/client'
 import { useSignupMutation } from '#/hooks/auth'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
@@ -10,8 +11,10 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field
 import { Input } from '#/components/ui/input'
 
 export function SignupForm() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const signupMutation = useSignupMutation()
+  const { signupSchema } = createAuthSchemas(t)
 
   const form = useForm({
     defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
@@ -40,7 +43,7 @@ export function SignupForm() {
       {signupMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
           <AlertDescription>
             {getErrorMessage(signupMutation.error)}
           </AlertDescription>
@@ -51,14 +54,14 @@ export function SignupForm() {
         <form.Field name="name">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Full name</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.signup.nameLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="text"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="e.g. Saloni Patidar"
+                placeholder={t('auth.signup.namePlaceholder')}
                 autoComplete="name"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -81,14 +84,14 @@ export function SignupForm() {
         <form.Field name="email">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Email address</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.signup.emailLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="email"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="you@example.com"
+                placeholder={t('auth.signup.emailPlaceholder')}
                 autoComplete="email"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -111,14 +114,14 @@ export function SignupForm() {
         <form.Field name="password">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.signup.passwordLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="password"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="At least 8 characters"
+                placeholder={t('auth.signup.passwordPlaceholder')}
                 autoComplete="new-password"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -141,14 +144,14 @@ export function SignupForm() {
         <form.Field name="confirmPassword">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.signup.confirmPasswordLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="password"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="Re-enter your password"
+                placeholder={t('auth.signup.confirmPasswordPlaceholder')}
                 autoComplete="new-password"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -177,7 +180,7 @@ export function SignupForm() {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Creating account…' : 'Create account'}
+            {isSubmitting ? t('auth.signup.creatingAccount') : t('auth.signup.createAccount')}
           </Button>
         )}
       </form.Subscribe>

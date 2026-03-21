@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
 
 const STEPS = ['Your profile', 'First record', 'All done']
@@ -9,11 +10,13 @@ type OnboardingLayoutProps = {
 }
 
 export function OnboardingLayout({ children, step }: OnboardingLayoutProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="min-h-svh bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm flex flex-col gap-8">
         <div className="text-center">
-          <span className="font-serif text-2xl font-semibold text-primary">MediTrack</span>
+          <span className="font-serif text-2xl font-semibold text-primary">{t('common.appName')}</span>
         </div>
 
         <div className="flex gap-3">

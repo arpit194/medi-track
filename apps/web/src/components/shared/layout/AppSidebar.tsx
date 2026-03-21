@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { ChevronRightIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
 import { NAV_ITEMS, type NavItem } from '#/lib/nav'
 import {
@@ -25,11 +26,13 @@ import { UserMenuContent } from '#/components/shared/layout/UserMenuContent'
 import { useUser } from '#/hooks/user'
 
 function NavGroup({ item }: { item: NavItem }) {
+  const { t } = useTranslation()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isGroupActive = item.children
     ? item.children.some((child) => pathname.startsWith(child.to))
     : pathname === item.to
   const [isOpen, setIsOpen] = useState(isGroupActive)
+  const label = t(item.labelKey)
 
   if (!item.children) {
     return (
@@ -37,10 +40,10 @@ function NavGroup({ item }: { item: NavItem }) {
         <SidebarMenuButton
           render={<Link to={item.to} />}
           isActive={pathname === item.to}
-          tooltip={item.label}
+          tooltip={label}
         >
           <item.icon />
-          <span>{item.label}</span>
+          <span>{label}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     )
@@ -51,10 +54,10 @@ function NavGroup({ item }: { item: NavItem }) {
       <SidebarMenuButton
         onClick={() => setIsOpen((o) => !o)}
         isActive={isGroupActive && !isOpen}
-        tooltip={item.label}
+        tooltip={label}
       >
         <item.icon />
-        <span>{item.label}</span>
+        <span>{label}</span>
         <ChevronRightIcon
           className={cn('ml-auto size-4 transition-transform duration-200', isOpen && 'rotate-90')}
         />
@@ -73,7 +76,7 @@ function NavGroup({ item }: { item: NavItem }) {
                   render={<Link to={child.to} />}
                   isActive={pathname === child.to}
                 >
-                  <span>{child.label}</span>
+                  <span>{t(child.labelKey)}</span>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
@@ -95,6 +98,7 @@ function getInitials(name: string) {
 }
 
 export function AppSidebar() {
+  const { t } = useTranslation()
   const { data: user } = useUser()
   const initials = user ? getInitials(user.name) : ''
 
@@ -103,7 +107,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-3">
         <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
           <Link to="/dashboard" className="font-serif text-xl font-semibold text-primary group-data-[collapsible=icon]:hidden">
-            MediTrack
+            {t('common.appName')}
           </Link>
           <SidebarTrigger />
         </div>

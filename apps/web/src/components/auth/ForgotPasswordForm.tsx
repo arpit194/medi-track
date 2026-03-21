@@ -1,6 +1,7 @@
 import { useForm } from '@tanstack/react-form'
 import { MailIcon, OctagonXIcon } from 'lucide-react'
-import { forgotPasswordSchema } from '#/lib/auth-schemas'
+import { useTranslation } from 'react-i18next'
+import { createAuthSchemas } from '#/lib/auth-schemas'
 import { getErrorMessage } from '#/api/client'
 import { useForgotPasswordMutation } from '#/hooks/auth'
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert'
@@ -9,7 +10,9 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field
 import { Input } from '#/components/ui/input'
 
 export function ForgotPasswordForm() {
+  const { t } = useTranslation()
   const forgotPasswordMutation = useForgotPasswordMutation()
+  const { forgotPasswordSchema } = createAuthSchemas(t)
 
   const form = useForm({
     defaultValues: { email: '' },
@@ -30,9 +33,9 @@ export function ForgotPasswordForm() {
           <MailIcon className="size-5 text-primary" />
         </div>
         <div className="flex flex-col gap-1">
-          <p className="font-medium text-foreground">Check your inbox</p>
+          <p className="font-medium text-foreground">{t('auth.forgotPassword.successHeading')}</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            If that email is registered, you'll receive a password reset link shortly.
+            {t('auth.forgotPassword.successMessage')}
           </p>
         </div>
       </div>
@@ -52,7 +55,7 @@ export function ForgotPasswordForm() {
       {forgotPasswordMutation.isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
           <AlertDescription>
             {getErrorMessage(forgotPasswordMutation.error)}
           </AlertDescription>
@@ -63,14 +66,14 @@ export function ForgotPasswordForm() {
         <form.Field name="email">
           {(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Email address</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('auth.forgotPassword.emailLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="email"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                placeholder="you@example.com"
+                placeholder={t('auth.forgotPassword.emailPlaceholder')}
                 autoComplete="email"
                 className="h-11"
                 aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
@@ -99,7 +102,7 @@ export function ForgotPasswordForm() {
             className="w-full"
             disabled={!canSubmit || !!isSubmitting}
           >
-            {isSubmitting ? 'Sending…' : 'Send reset link'}
+            {isSubmitting ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.sendResetLink')}
           </Button>
         )}
       </form.Subscribe>

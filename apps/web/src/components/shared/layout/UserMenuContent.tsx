@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { LogOutIcon, SettingsIcon, UserIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -9,20 +10,25 @@ import {
 } from '#/components/ui/dropdown-menu'
 import { useSignoutMutation } from '#/hooks/auth'
 
-export function UserMenuContent({ align = 'end' }: { align?: 'start' | 'end' | 'center' }) {
+export function UserMenuContent({
+  align = 'end',
+}: {
+  align?: 'start' | 'end' | 'center'
+}) {
+  const { t } = useTranslation()
   const signoutMutation = useSignoutMutation()
 
   return (
     <DropdownMenuContent align={align} className="w-52">
       <DropdownMenuGroup>
-        <DropdownMenuLabel>My account</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('nav.myAccount')}</DropdownMenuLabel>
         <DropdownMenuItem render={<Link to="/profile" />}>
           <UserIcon />
-          Profile
+          {t('nav.profile')}
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link to="/settings" />}>
           <SettingsIcon />
-          Settings
+          {t('nav.settings')}
         </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
@@ -33,7 +39,7 @@ export function UserMenuContent({ align = 'end' }: { align?: 'start' | 'end' | '
           onClick={() => signoutMutation.mutate()}
         >
           <LogOutIcon />
-          Sign out
+          {t('nav.signOut')}
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </DropdownMenuContent>

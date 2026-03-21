@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { FolderOpenIcon, OctagonXIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '#/components/ui/badge'
 import {
   Card,
@@ -106,7 +107,6 @@ function TimelineCard({ report }: { report: Report }) {
 function MonthSection({ month, reports }: MonthGroup) {
   return (
     <div className="relative flex gap-5">
-      {/* Timeline rail */}
       <div className="relative flex flex-col items-center">
         <div className="mt-1 size-2.5 shrink-0 rounded-full bg-primary/60 ring-2 ring-background ring-offset-1" />
         <div className="mt-1 w-px flex-1 bg-border" />
@@ -134,6 +134,7 @@ function YearDivider({ year }: { year: string }) {
 }
 
 export function TimelinePage() {
+  const { t } = useTranslation()
   const [typeFilter, setTypeFilter] = useState('')
   const { data: filters } = useReportFilters()
   const { data, isLoading, isError, error } = useReports({
@@ -153,17 +154,17 @@ export function TimelinePage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Timeline</h1>
+        <h1 className="text-2xl font-medium">{t('pageTitle.timeline')}</h1>
         <NativeSelect
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
           aria-label="Filter by report type"
           className="w-40 [&_select]:h-9"
         >
-          <NativeSelectOption value="">All types</NativeSelectOption>
-          {filters?.types.map((t) => (
-            <NativeSelectOption key={t} value={t}>
-              {t}
+          <NativeSelectOption value="">{t('common.allTypes')}</NativeSelectOption>
+          {filters?.types.map((type) => (
+            <NativeSelectOption key={type} value={type}>
+              {type}
             </NativeSelectOption>
           ))}
         </NativeSelect>
@@ -172,9 +173,9 @@ export function TimelinePage() {
       {isError && (
         <Alert variant="destructive">
           <OctagonXIcon className="size-4" />
-          <AlertTitle>Couldn't load your timeline</AlertTitle>
+          <AlertTitle>{t('common.somethingWentWrong')}</AlertTitle>
           <AlertDescription>
-            {getErrorMessage(error)} Please try again.
+            {getErrorMessage(error)} {t('common.tryAgain')}
           </AlertDescription>
         </Alert>
       )}
@@ -194,18 +195,18 @@ export function TimelinePage() {
               <FolderOpenIcon />
             </EmptyMedia>
             <EmptyTitle>
-              {typeFilter ? 'No reports for this type' : 'No reports yet'}
+              {typeFilter ? t('share.create.noReportsForType') : t('reports.noReportsHeading')}
             </EmptyTitle>
             <EmptyDescription>
               {typeFilter
-                ? 'Try a different type filter.'
-                : 'Your medical history will appear here once you upload reports.'}
+                ? t('reports.noResultsDescription')
+                : t('reports.noReportsDescription')}
             </EmptyDescription>
           </EmptyHeader>
           {!typeFilter && (
             <EmptyContent>
               <Link to="/reports/upload" className={buttonVariants()}>
-                Upload your first report
+                {t('reports.uploadFirst')}
               </Link>
             </EmptyContent>
           )}

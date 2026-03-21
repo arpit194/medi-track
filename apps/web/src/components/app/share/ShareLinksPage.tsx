@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { CopyIcon, LinkIcon, PlusIcon, ClockIcon } from 'lucide-react'
 import { format, isPast } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import { buttonVariants } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
@@ -16,14 +17,8 @@ import { RevokeShareLinkButton } from './RevokeShareLinkButton'
 import { ReactivateShareLinkButton } from './ReactivateShareLinkButton'
 import type { ShareLink } from '@medi-track/types'
 
-const EXPIRY_LABELS: Record<string, string> = {
-  '24h': '24 hours',
-  '7d': '7 days',
-  '30d': '30 days',
-  one_time: 'One-time view',
-}
-
 function ShareLinkCard({ link }: { link: ShareLink }) {
+  const { t } = useTranslation()
   const revokeMutation = useRevokeShareLinkMutation()
   const reactivateMutation = useReactivateShareLinkMutation()
   const shareUrl = `${window.location.origin}/s/${link.token}`
@@ -32,7 +27,7 @@ function ShareLinkCard({ link }: { link: ShareLink }) {
 
   function copyLink() {
     void navigator.clipboard.writeText(shareUrl)
-    toast.success('Link copied to clipboard')
+    toast.success(t('share.copied'))
   }
 
   return (
@@ -42,18 +37,18 @@ function ShareLinkCard({ link }: { link: ShareLink }) {
         <CardDescription className="flex items-center gap-1.5">
           <ClockIcon className="size-3.5" />
           {link.isRevoked
-            ? 'Revoked'
+            ? t('share.statusRevoked')
             : expired
-              ? `Expired ${format(new Date(link.expiresAt), 'd MMM yyyy')}`
-              : `Expires ${format(new Date(link.expiresAt), 'd MMM yyyy')}`}
+              ? t('share.expiredOn', { date: format(new Date(link.expiresAt), 'd MMM yyyy') })
+              : t('share.expiresOn', { date: format(new Date(link.expiresAt), 'd MMM yyyy') })}
         </CardDescription>
         <CardAction>
           {inactive ? (
             <Badge variant="outline" className="text-muted-foreground">
-              {link.isRevoked ? 'Revoked' : 'Expired'}
+              {link.isRevoked ? t('share.statusRevoked') : t('share.statusExpired')}
             </Badge>
           ) : (
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Active</Badge>
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">{t('share.statusActive')}</Badge>
           )}
         </CardAction>
       </CardHeader>
@@ -63,7 +58,7 @@ function ShareLinkCard({ link }: { link: ShareLink }) {
           {!inactive && (
             <button
               onClick={copyLink}
-              aria-label="Copy link"
+              aria-label={t('share.copyLink')}
               className="shrink-0 text-muted-foreground hover:text-foreground transition-colors min-h-11 min-w-11 flex items-center justify-center"
             >
               <CopyIcon className="size-4" />
@@ -72,7 +67,10 @@ function ShareLinkCard({ link }: { link: ShareLink }) {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            {link.reportIds.length} {link.reportIds.length === 1 ? 'report' : 'reports'} · {EXPIRY_LABELS[link.expiresIn] ?? link.expiresIn}
+            {t('share.reportsAndExpiry', {
+              reports: t('common.reportCount_other', { count: link.reportIds.length }),
+              expiry: t(`expiry.${link.expiresIn}` as 'expiry.24h' | 'expiry.7d' | 'expiry.30d' | 'expiry.one_time'),
+            })}
           </span>
           <div className="flex items-center gap-2">
             {inactive && (
@@ -142,6 +140,7 @@ function LinksList({ links, emptyTitle, emptyDescription }: {
 }
 
 export function ShareLinksPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { tab } = useSearch({ from: '/_app/share/' })
   const { data: links, isLoading, isError, error } = useShareLinks()
@@ -161,10 +160,10 @@ export function ShareLinksPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 w-full max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-medium">Share links</h1>
+        <h1 className="font-serif text-2xl font-medium">{t('share.heading')}</h1>
         <Link to="/share/new" className={buttonVariants()}>
           <PlusIcon className="size-4" />
-          New link
+          {t('share.newLink')}
         </Link>
       </div>
 
@@ -178,13 +177,13 @@ export function ShareLinksPage() {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon"><LinkIcon /></EmptyMedia>
-            <EmptyTitle>No share links yet</EmptyTitle>
+            <EmptyTitle>{t('share.emptyHeading')}</EmptyTitle>
             <EmptyDescription>
-              Create a link to share your reports with a doctor or specialist — no account needed on their end.
+              {t('share.emptyDescription')}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Link to="/share/new" className={buttonVariants()}>Create your first link</Link>
+            <Link to="/share/new" className={buttonVariants()}>{t('share.createFirst')}</Link>
           </EmptyContent>
         </Empty>
       )}
@@ -193,7 +192,7 @@ export function ShareLinksPage() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="active">
-              Active
+              {t('share.tabActive')}
               {active.length > 0 && (
                 <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium text-primary leading-none">
                   {active.length}
@@ -201,7 +200,7 @@ export function ShareLinksPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="inactive">
-              Expired & revoked
+              {t('share.tabInactive')}
               {inactive.length > 0 && (
                 <span className="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground leading-none">
                   {inactive.length}
@@ -212,15 +211,15 @@ export function ShareLinksPage() {
           <TabsContent value="active" className="mt-4">
             <LinksList
               links={active}
-              emptyTitle="No active links"
-              emptyDescription="All your links have expired or been revoked. Create a new one to share reports again."
+              emptyTitle={t('share.noActiveHeading')}
+              emptyDescription={t('share.noActiveDescription')}
             />
           </TabsContent>
           <TabsContent value="inactive" className="mt-4">
             <LinksList
               links={inactive}
-              emptyTitle="No expired or revoked links"
-              emptyDescription="Links that have expired or been revoked will appear here."
+              emptyTitle={t('share.noInactiveHeading')}
+              emptyDescription={t('share.noInactiveDescription')}
             />
           </TabsContent>
         </Tabs>
