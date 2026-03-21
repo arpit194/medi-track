@@ -32,6 +32,14 @@ export class AuthService {
       data: { name, email, password: hashed },
     })
 
+    const token = crypto.randomBytes(32).toString('hex')
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    await this.prisma.emailVerificationToken.create({
+      data: { userId: record.id, token, expiresAt },
+    })
+    const frontendUrl = this.config.getOrThrow<string>('FRONTEND_URL').split(',')[0]
+    await this.email.sendEmailVerification(email, name, `${frontendUrl}/verify-email?token=${token}`)
+
     const user = toUser(record)
     this.setRefreshCookie(res, user)
     return { user, token: this.signAccessToken(user) }
@@ -79,6 +87,34 @@ export class AuthService {
 
   logout(res: Response): void {
     res.clearCookie(REFRESH_COOKIE, { path: '/api/auth' })
+  }
+
+  async verifyEmail(token: string): Promise<void> {
+    const record = await this.prisma.emailVerificationToken.findUnique({ where: { token } })
+
+    // Token not found or expired (never used) — genuine error
+    if (!record || record.expiresAt < new Date()) {
+      throw new BadRequestException('This verification link is invalid or has expired.')
+    }
+
+    // Already used — user's email was already verified successfully, treat as success
+    if (record.usedAt) return
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: record.userId }, data: { emailVerifiedAt: new Date() } }),
+      this.prisma.emailVerificationToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+    ])
+  }
+
+  async resendVerificationEmail(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId, deletedAt: null } })
+    if (!user || user.emailVerifiedAt) return
+
+    const token = crypto.randomBytes(32).toString('hex')
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    await this.prisma.emailVerificationToken.create({ data: { userId, token, expiresAt } })
+    const frontendUrl = this.config.getOrThrow<string>('FRONTEND_URL').split(',')[0]
+    await this.email.sendEmailVerification(user.email, user.name, `${frontendUrl}/verify-email?token=${token}`)
   }
 
   async forgotPassword(email: string): Promise<void> {

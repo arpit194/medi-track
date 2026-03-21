@@ -17,23 +17,26 @@ enum UserRole {
 // ---- Models ----
 
 model User {
-  id          String     @id @default(uuid(7))
-  name        String
-  email       String     @unique
-  password    String
-  dob         String?
-  bloodType   String?
-  gender      String?
-  role        UserRole   @default(patient)
-  isOnboarded Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  deletedAt   DateTime?
-  deletedBy   String?
-  lastLoginAt DateTime?
-  reports             Report[]
-  passwordResetTokens PasswordResetToken[]
-  shareLinks          ShareLink[]
+  id              String    @id @default(uuid(7))
+  name            String
+  email           String    @unique
+  password        String
+  dob             String?
+  bloodType       String?
+  gender          String?
+  role            UserRole  @default(patient)
+  isOnboarded     Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  deletedBy       String?
+  lastLoginAt     DateTime?
+
+  reports                  Report[]
+  passwordResetTokens      PasswordResetToken[]
+  emailVerificationTokens  EmailVerificationToken[]
+  shareLinks               ShareLink[]
 }
 
 model Report {
@@ -63,24 +66,42 @@ model ReportFile {
 }
 
 model ShareLink {
-  id        String   @id @default(uuid(7))
+  id        String          @id @default(uuid(7))
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
   reportIds String[]
   label     String
-  token     String   @unique
+  token     String          @unique
   expiresIn String
   expiresAt DateTime
-  isRevoked Boolean  @default(false)
-  createdAt DateTime @default(now())
+  isRevoked Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  views     ShareLinkView[]
+}
+
+model ShareLinkView {
+  id          String    @id @default(uuid(7))
+  shareLinkId String
+  shareLink   ShareLink @relation(fields: [shareLinkId], references: [id])
+  viewedAt    DateTime  @default(now())
 }
 
 model PasswordResetToken {
-  id        String   @id @default(uuid(7))
+  id        String    @id @default(uuid(7))
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  token     String   @unique
+  user      User      @relation(fields: [userId], references: [id])
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid(7))
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 }

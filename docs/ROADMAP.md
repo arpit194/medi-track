@@ -43,7 +43,7 @@ Items are grouped by theme. Check off items as they are completed.
 ## Auth & accounts
 
 - [x] Email sending for password reset (Resend, verified domain medi-track.arpit194.in)
-- [ ] Email verification on signup
+- [x] Email verification on signup (banner in app shell, /verify-email page, resend support)
 - [ ] Google / Apple sign-in (OAuth)
 - [ ] Account deletion with data export
 - [ ] Login activity / session management (view and revoke active sessions)
@@ -56,14 +56,14 @@ Items are grouped by theme. Check off items as they are completed.
 - [ ] Bulk upload (multiple files in one go)
 - [ ] Report tagging / custom labels beyond the current type system
 - [ ] Condition grouping — link related reports to a named condition (e.g. "Diabetes 2023–")
-- [ ] Report search by keyword across title, doctor name, and notes
+- [x] Report search by keyword across title, doctor name, and notes
 - [ ] Lab value extraction and trend graphs (e.g. track HbA1c over time)
 
 ---
 
 ## Sharing
 
-- [ ] Share link analytics — show owner when/how many times a link was viewed
+- [x] Share link analytics — show owner when/how many times a link was viewed
 - [ ] Password-protected share links (optional extra layer)
 - [ ] Direct share to a registered doctor account (without public link)
 

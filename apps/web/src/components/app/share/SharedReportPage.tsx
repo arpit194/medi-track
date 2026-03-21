@@ -1,17 +1,20 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Route } from '#/routes/s/$token'
-import { usePublicShareView } from '#/hooks/share'
+import { useShareLinkStatus, useVerifyShareLinkMutation } from '#/hooks/share'
 import { format, parseISO, isAfter, isBefore, isEqual } from 'date-fns'
-import { FileIcon, ShieldIcon } from 'lucide-react'
+import { FileIcon, ShieldIcon, LockIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardAction } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
 import { Skeleton } from '#/components/ui/skeleton'
 import { NativeSelect, NativeSelectOption } from '#/components/ui/native-select'
 import { DatePicker } from '#/components/shared/DatePicker'
 import { getErrorMessage } from '#/api/client'
-import type { Report } from '@medi-track/types'
+import type { Report, PublicShareView } from '@medi-track/types'
 
 type MonthGroup = { month: string; reports: Report[] }
 type YearGroup = { year: string; months: MonthGroup[] }
@@ -90,25 +93,79 @@ function SharedReportPageSkeleton() {
   )
 }
 
+function CodeGate({ onVerified, isPending, isError, error }: {
+  onVerified: (code: string) => void
+  isPending: boolean
+  isError: boolean
+  error: unknown
+}) {
+  const { t } = useTranslation()
+  const [code, setCode] = useState('')
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (code.trim()) onVerified(code.trim())
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-6 text-center w-full max-w-sm mx-auto py-16">
+      <div className="flex size-14 items-center justify-center rounded-full bg-primary/10">
+        <LockIcon className="size-6 text-primary" />
+      </div>
+      <div className="flex flex-col gap-2">
+        <h1 className="font-serif text-2xl font-medium">{t('share.public.enterCode')}</h1>
+        <p className="text-muted-foreground leading-relaxed">{t('share.public.enterCodeDescription')}</p>
+      </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-1.5 text-left">
+          <Label htmlFor="access-code">{t('share.public.codeLabel')}</Label>
+          <Input
+            id="access-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder={t('share.public.codePlaceholder')}
+            className="font-mono text-lg tracking-widest text-center h-12"
+            maxLength={8}
+            autoComplete="off"
+            autoFocus
+          />
+        </div>
+        {isError && (
+          <p className="text-sm text-destructive">{getErrorMessage(error)}</p>
+        )}
+        <Button type="submit" size="lg" className="w-full" disabled={!code.trim() || isPending}>
+          {isPending ? t('share.public.verifying') : t('share.public.viewReports')}
+        </Button>
+      </form>
+    </div>
+  )
+}
+
 export function SharedReportPage() {
   const { t } = useTranslation()
   const { token } = Route.useParams()
   const { type: typeFilter = '', dateFrom, dateTo, sortOrder } = useSearch({ from: '/s/$token' })
   const navigate = useNavigate()
-  const { data, isLoading, isError, error } = usePublicShareView(token)
+  const [verifiedData, setVerifiedData] = useState<PublicShareView | null>(null)
+  const { isLoading: isChecking, isError: isUnavailable, error: unavailableError } = useShareLinkStatus(token)
+  const { mutate, isPending, isError, error } = useVerifyShareLinkMutation()
+
+  function handleVerify(code: string) {
+    mutate({ token, code }, { onSuccess: setVerifiedData })
+  }
 
   const types = useMemo(
-    () => [...new Set((data?.reports ?? []).map((r) => r.type))].sort(),
-    [data],
+    () => [...new Set((verifiedData?.reports ?? []).map((r) => r.type))].sort(),
+    [verifiedData],
   )
 
   const dateRange = useMemo(() => {
-    const dates = (data?.reports ?? []).map((r) => r.date).sort()
+    const dates = (verifiedData?.reports ?? []).map((r) => r.date).sort()
     return { min: dates[0], max: dates[dates.length - 1] }
-  }, [data])
+  }, [verifiedData])
 
   const filtered = useMemo(() => {
-    let reports = data?.reports ?? []
+    let reports = verifiedData?.reports ?? []
     if (typeFilter) reports = reports.filter((r) => r.type === typeFilter)
     if (dateFrom) reports = reports.filter((r) => {
       const d = parseISO(r.date)
@@ -122,7 +179,7 @@ export function SharedReportPage() {
     })
     const sorted = [...reports].sort((a, b) => a.date.localeCompare(b.date))
     return sortOrder === 'asc' ? sorted : sorted.reverse()
-  }, [data, typeFilter, dateFrom, dateTo, sortOrder])
+  }, [verifiedData, typeFilter, dateFrom, dateTo, sortOrder])
 
   const groups = useMemo(() => groupReports(filtered), [filtered])
 
@@ -145,24 +202,33 @@ export function SharedReportPage() {
       </header>
 
       <main className="mx-auto max-w-4xl flex flex-col gap-6 p-4 md:p-6">
-        {isLoading && <SharedReportPageSkeleton />}
+        {isChecking && <SharedReportPageSkeleton />}
 
-        {isError && (
+        {!isChecking && isUnavailable && (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <div className="flex size-14 items-center justify-center rounded-full bg-muted">
               <FileIcon className="size-6 text-muted-foreground" />
             </div>
             <p className="text-lg font-medium">{t('share.public.unavailableHeading')}</p>
-            <p className="text-muted-foreground leading-relaxed max-w-sm">{getErrorMessage(error)}</p>
+            <p className="text-muted-foreground leading-relaxed max-w-sm">{getErrorMessage(unavailableError)}</p>
           </div>
         )}
 
-        {!isError && data && (
+        {!isChecking && !isUnavailable && !verifiedData && (
+          <CodeGate
+            onVerified={handleVerify}
+            isPending={isPending}
+            isError={isError}
+            error={error}
+          />
+        )}
+
+        {verifiedData && (
           <>
             <div className="flex flex-col gap-1">
-              <h1 className="font-serif text-2xl font-medium">{data.label}</h1>
+              <h1 className="font-serif text-2xl font-medium">{verifiedData.label}</h1>
               <p className="text-sm text-muted-foreground">
-                {t('share.public.expiresAt', { datetime: format(new Date(data.expiresAt), 'd MMM yyyy, HH:mm') })}
+                {t('share.public.expiresAt', { datetime: format(new Date(verifiedData.expiresAt), 'd MMM yyyy, HH:mm') })}
               </p>
             </div>
 

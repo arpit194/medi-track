@@ -49,10 +49,28 @@ export class ShareController {
     return this.shareService.revokeShareLink(user.sub, id)
   }
 
-  // Public route — no auth required
+  @Post('share/:id/send-email')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  sendShareLinkEmail(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() body: { recipientEmail: string },
+  ) {
+    return this.shareService.sendShareLinkEmail(user.sub, id, body.recipientEmail)
+  }
+
+  // Public routes — no auth required
   @Get('s/:token')
+  async checkShareLink(@Param('token') token: string) {
+    await this.shareService.checkShareLink(token)
+    return { valid: true }
+  }
+
+  @Post('s/:token')
   @ApiGetPublicShareView()
-  getPublicShareView(@Param('token') token: string) {
-    return this.shareService.getPublicShareView(token)
+  getPublicShareView(@Param('token') token: string, @Body() body: { code: string }) {
+    return this.shareService.getPublicShareView(token, body.code)
   }
 }

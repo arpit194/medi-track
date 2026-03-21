@@ -61,6 +61,15 @@ export class ReportsService {
       ...(query.type
         ? { type: { contains: query.type, mode: 'insensitive' as const } }
         : {}),
+      ...(query.search
+        ? {
+            OR: [
+              { title: { contains: query.search, mode: 'insensitive' as const } },
+              { doctorName: { contains: query.search, mode: 'insensitive' as const } },
+              { notes: { contains: query.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
       ...(query.dateFrom || query.dateTo
         ? {
             date: {

@@ -1,12 +1,15 @@
 import { ApiTags } from '@nestjs/swagger'
-import { Controller, Post, Body, HttpCode, HttpStatus, UsePipes, Req, Res } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, UsePipes, Req, Res, Get, Query, UseGuards } from '@nestjs/common'
 import type { Request, Response } from 'express'
 import { AuthService } from './auth.service'
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'
 import { SignupDto } from './dto/signup.dto'
 import { LoginDto } from './dto/login.dto'
-import { ApiSignup, ApiLogin, ApiForgotPassword, ApiResetPassword } from './auth.swagger'
+import { JwtAuthGuard } from './guards/jwt.guard'
+import { CurrentUser } from './decorators/current-user.decorator'
+import { ApiSignup, ApiLogin, ApiForgotPassword, ApiResetPassword, ApiVerifyEmail, ApiResendVerificationEmail } from './auth.swagger'
 import type { SignupRequest, LoginRequest } from '@medi-track/types'
+import type { JwtPayload } from '../common/types/jwt'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -38,6 +41,21 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   logout(@Res({ passthrough: true }) res: Response) {
     return this.authService.logout(res)
+  }
+
+  @Get('verify-email')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiVerifyEmail()
+  verifyEmail(@Query('token') token: string) {
+    return this.authService.verifyEmail(token)
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  @ApiResendVerificationEmail()
+  resendVerification(@CurrentUser() user: JwtPayload) {
+    return this.authService.resendVerificationEmail(user.sub)
   }
 
   @Post('forgot-password')

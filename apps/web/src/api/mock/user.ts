@@ -10,6 +10,7 @@ const MOCK_USER: User = {
   gender: 'prefer_not_to_say',
   role: 'patient',
   isOnboarded: true,
+  emailVerifiedAt: '2024-01-10T08:00:00Z',
   createdAt: '2024-01-10T08:00:00Z',
   updatedAt: '2024-01-10T08:00:00Z',
   lastLoginAt: null,

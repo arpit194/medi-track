@@ -12,6 +12,7 @@ export const UserSchema = z.object({
   gender: z.string().nullable(),
   role: UserRoleSchema,
   isOnboarded: z.boolean(),
+  emailVerifiedAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
   lastLoginAt: z.string().nullable(),

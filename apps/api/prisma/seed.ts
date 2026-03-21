@@ -37,6 +37,7 @@ async function main() {
           bloodType: faker.helpers.arrayElement(BLOOD_TYPES),
           gender: faker.helpers.arrayElement(GENDERS),
           isOnboarded: true,
+          emailVerifiedAt: new Date(),
         },
       })
     }),

@@ -156,6 +156,7 @@ A short clarifying question is always better than building the wrong thing confi
 | Reading routes or URLs | `/meditrack-routes` |
 | Referencing colours, tokens, typography, spacing | `/meditrack-theme` |
 | Building any form | `/meditrack-form` |
+| Adding or updating translations | `/meditrack-translate` |
 
 Multiple skills may apply — load all of them before starting.
 

@@ -37,8 +37,8 @@ client.interceptors.response.use(
 
     const original = error.config
 
-    // Don't retry refresh/logout calls to avoid infinite loops
-    if ((original as unknown as Record<string, unknown>)['_retry'] || original.url?.includes('/auth/')) {
+    // Don't retry refresh/logout calls or public share routes to avoid infinite loops
+    if ((original as unknown as Record<string, unknown>)['_retry'] || original.url?.includes('/auth/') || original.url?.startsWith('/s/')) {
       return Promise.reject(error)
     }
 

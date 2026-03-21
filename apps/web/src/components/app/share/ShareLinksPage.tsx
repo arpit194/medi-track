@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { CopyIcon, LinkIcon, PlusIcon, ClockIcon } from 'lucide-react'
+import { CopyIcon, LinkIcon, PlusIcon, ClockIcon, KeyRoundIcon } from 'lucide-react'
 import { format, isPast } from 'date-fns'
 import { useTranslation } from 'react-i18next'
 import { buttonVariants } from '#/components/ui/button'
@@ -15,6 +15,7 @@ import { useShareLinks, useRevokeShareLinkMutation, useReactivateShareLinkMutati
 import { cn } from '#/lib/utils'
 import { RevokeShareLinkButton } from './RevokeShareLinkButton'
 import { ReactivateShareLinkButton } from './ReactivateShareLinkButton'
+import { SendShareLinkEmailDialog } from './SendShareLinkEmailDialog'
 import type { ShareLink } from '@medi-track/types'
 
 function ShareLinkCard({ link }: { link: ShareLink }) {
@@ -65,14 +66,41 @@ function ShareLinkCard({ link }: { link: ShareLink }) {
             </button>
           )}
         </div>
+
+        {!inactive && <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5">
+          <KeyRoundIcon className="size-4 text-muted-foreground shrink-0" />
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="text-xs text-muted-foreground">{t('share.accessCode')}</span>
+            <span className="font-mono font-semibold tracking-widest text-sm">{link.accessCode}</span>
+          </div>
+          <button
+            onClick={() => {
+              void navigator.clipboard.writeText(link.accessCode)
+              toast.success(t('share.codeCopied'))
+            }}
+            aria-label={t('share.copyCode')}
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors min-h-11 min-w-11 flex items-center justify-center"
+          >
+            <CopyIcon className="size-4" />
+          </button>
+        </div>}
+
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            {t('share.reportsAndExpiry', {
-              reports: t('common.reportCount_other', { count: link.reportIds.length }),
-              expiry: t(`expiry.${link.expiresIn}` as 'expiry.24h' | 'expiry.7d' | 'expiry.30d' | 'expiry.one_time'),
-            })}
-          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm text-muted-foreground">
+              {t('share.reportsAndExpiry', {
+                reports: t('common.reportCount_other', { count: link.reportIds.length }),
+                expiry: t(`expiry.${link.expiresIn}` as 'expiry.24h' | 'expiry.7d' | 'expiry.30d' | 'expiry.one_time'),
+              })}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {link.viewCount === 0
+                ? t('share.viewCountNever')
+                : t(`share.viewCount_other`, { count: link.viewCount })}
+            </span>
+          </div>
           <div className="flex items-center gap-2">
+            {!inactive && <SendShareLinkEmailDialog shareLinkId={link.id} />}
             {inactive && (
               <ReactivateShareLinkButton
                 onConfirm={(expiresIn) => reactivateMutation.mutate({ id: link.id, expiresIn })}

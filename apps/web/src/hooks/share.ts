@@ -5,7 +5,6 @@ import type { CreateShareLinkRequest } from '@medi-track/types'
 export const shareLinkKeys = {
   all: ['shareLinks'] as const,
   list: () => [...shareLinkKeys.all, 'list'] as const,
-  public: (token: string) => ['publicShare', token] as const,
 }
 
 export function useShareLinks() {
@@ -15,14 +14,20 @@ export function useShareLinks() {
   })
 }
 
-export function usePublicShareView(token: string) {
+export function useShareLinkStatus(token: string) {
   return useQuery({
-    queryKey: shareLinkKeys.public(token),
-    queryFn: () => api.share.getPublicShareView(token),
-    enabled: !!token,
+    queryKey: ['shareLink', token, 'status'] as const,
+    queryFn: () => api.share.checkShareLink(token),
     retry: 0,
     refetchOnWindowFocus: false,
-    placeholderData: undefined,
+  })
+}
+
+export function useVerifyShareLinkMutation() {
+  return useMutation({
+    mutationFn: ({ token, code }: { token: string; code: string }) =>
+      api.share.verifyShareLink(token, code),
+    retry: 0,
   })
 }
 
@@ -54,5 +59,12 @@ export function useRevokeShareLinkMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shareLinkKeys.all })
     },
+  })
+}
+
+export function useSendShareLinkEmailMutation() {
+  return useMutation({
+    mutationFn: ({ id, recipientEmail }: { id: string; recipientEmail: string }) =>
+      api.share.sendShareLinkEmail(id, recipientEmail),
   })
 }

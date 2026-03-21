@@ -10,9 +10,11 @@ export const ShareLinkSchema = z.object({
   reportIds: z.array(z.string()),
   label: z.string(),
   token: z.string(),
+  accessCode: z.string(),
   expiresIn: ShareLinkExpiryOptionSchema,
   expiresAt: z.string(),
   isRevoked: z.boolean(),
+  viewCount: z.number(),
   createdAt: z.string(),
 })
 export type ShareLink = z.infer<typeof ShareLinkSchema>

@@ -9,6 +9,7 @@ type UserRecord = {
   gender: string | null
   role: UserRole
   isOnboarded: boolean
+  emailVerifiedAt: Date | null
   createdAt: Date
   updatedAt: Date
   lastLoginAt: Date | null
@@ -24,6 +25,7 @@ export function toUser(record: UserRecord): User {
     gender: record.gender,
     role: record.role,
     isOnboarded: record.isOnboarded,
+    emailVerifiedAt: record.emailVerifiedAt?.toISOString() ?? null,
     createdAt: record.createdAt.toISOString(),
     updatedAt: record.updatedAt.toISOString(),
     lastLoginAt: record.lastLoginAt?.toISOString() ?? null,

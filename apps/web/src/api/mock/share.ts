@@ -3,6 +3,10 @@ import { delay } from './_utils'
 
 let MOCK_SHARE_LINKS: ShareLink[] = []
 
+function deriveMockCode(id: string): string {
+  return id.slice(-8).toUpperCase()
+}
+
 export async function listShareLinks(): Promise<ShareLink[]> {
   await delay()
   return MOCK_SHARE_LINKS
@@ -10,15 +14,18 @@ export async function listShareLinks(): Promise<ShareLink[]> {
 
 export async function createShareLink(input: CreateShareLinkRequest): Promise<ShareLink> {
   await delay()
+  const id = `link-${Date.now()}`
   const link: ShareLink = {
-    id: `link-${Date.now()}`,
+    id,
     userId: 'mock-user-1',
     reportIds: input.reportIds,
     label: input.label,
     token: `mock-token-${Date.now()}`,
+    accessCode: deriveMockCode(id),
     expiresIn: input.expiresIn,
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     isRevoked: false,
+    viewCount: 0,
     createdAt: new Date().toISOString(),
   }
   MOCK_SHARE_LINKS = [link, ...MOCK_SHARE_LINKS]
@@ -41,9 +48,21 @@ export async function revokeShareLink(id: string): Promise<void> {
   )
 }
 
-export async function getPublicShareView(token: string): Promise<PublicShareView> {
+export async function checkShareLink(token: string): Promise<{ valid: boolean }> {
   await delay()
   const link = MOCK_SHARE_LINKS.find((l) => l.token === token)
   if (!link || link.isRevoked) throw new Error('This link is invalid or has expired.')
+  return { valid: true }
+}
+
+export async function verifyShareLink(token: string, code: string): Promise<PublicShareView> {
+  await delay()
+  const link = MOCK_SHARE_LINKS.find((l) => l.token === token)
+  if (!link || link.isRevoked) throw new Error('This link is invalid or has expired.')
+  if (code.toUpperCase() !== link.accessCode) throw new Error('Incorrect access code.')
   return { label: link.label, expiresAt: link.expiresAt, reports: [] }
+}
+
+export async function sendShareLinkEmail(_id: string, _recipientEmail: string): Promise<void> {
+  await delay()
 }

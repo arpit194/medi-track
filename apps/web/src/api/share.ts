@@ -20,7 +20,16 @@ export async function revokeShareLink(id: string): Promise<void> {
   await client.delete(`/share/${id}`)
 }
 
-export async function getPublicShareView(token: string): Promise<PublicShareView> {
-  const { data } = await client.get<PublicShareView>(`/s/${token}`)
+export async function checkShareLink(token: string): Promise<{ valid: boolean }> {
+  const { data } = await client.get<{ valid: boolean }>(`/s/${token}`)
   return data
+}
+
+export async function verifyShareLink(token: string, code: string): Promise<PublicShareView> {
+  const { data } = await client.post<PublicShareView>(`/s/${token}`, { code })
+  return data
+}
+
+export async function sendShareLinkEmail(id: string, recipientEmail: string): Promise<void> {
+  await client.post(`/share/${id}/send-email`, { recipientEmail })
 }

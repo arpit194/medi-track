@@ -1,5 +1,5 @@
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { PlusIcon, FolderOpenIcon, OctagonXIcon } from 'lucide-react'
+import { PlusIcon, FolderOpenIcon, OctagonXIcon, SearchIcon } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTranslation } from 'react-i18next'
 import { cn } from '#/lib/utils'
@@ -131,10 +131,10 @@ export function ReportsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const search = useSearch({ from: '/_app/reports/' })
-  const { page, limit, type, dateFrom, dateTo, sortOrder } = search
+  const { page, limit, type, search: searchQuery, dateFrom, dateTo, sortOrder } = search
 
   const { data: filters } = useReportFilters()
-  const { data, isLoading, isError, error } = useReports({ page, limit, type, dateFrom, dateTo, sortOrder })
+  const { data, isLoading, isError, error } = useReports({ page, limit, type, search: searchQuery, dateFrom, dateTo, sortOrder })
 
   const reports = data?.data ?? []
   const totalPages = data?.totalPages ?? 1
@@ -151,6 +151,17 @@ export function ReportsPage() {
           <PlusIcon className="size-4" />
           {t('reports.uploadButton')}
         </Link>
+      </div>
+
+      <div className="relative">
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="search"
+          placeholder={t('reports.searchPlaceholder')}
+          value={searchQuery ?? ''}
+          onChange={(e) => setSearch({ search: e.target.value || undefined })}
+          className="h-11 w-full rounded-md border border-input bg-background pl-9 pr-4 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -206,7 +217,7 @@ export function ReportsPage() {
         </div>
       )}
 
-      {!isLoading && !isError && reports.length === 0 && !type && !dateFrom && !dateTo && (
+      {!isLoading && !isError && reports.length === 0 && !type && !searchQuery && !dateFrom && !dateTo && (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
@@ -219,7 +230,7 @@ export function ReportsPage() {
         </Empty>
       )}
 
-      {!isLoading && !isError && reports.length === 0 && (type || dateFrom || dateTo) && (
+      {!isLoading && !isError && reports.length === 0 && (type || searchQuery || dateFrom || dateTo) && (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>

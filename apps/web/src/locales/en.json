@@ -17,7 +17,10 @@
     "perPage": "{{count}} per page",
     "reportCount_one": "{{count}} report",
     "reportCount_other": "{{count}} reports",
-    "pleaseWait": "Please wait…"
+    "pleaseWait": "Please wait…",
+    "verifyEmailBannerText": "Please verify your email address to get the most out of MediTrack.",
+    "verifyEmailBannerAction": "Resend verification email",
+    "verifyEmailBannerSent": "Verification email sent!"
   },
   "bloodType": {
     "label": "Blood type",
@@ -112,6 +115,19 @@
       "successMessage": "If that email is registered, you'll receive a password reset link shortly.",
       "rememberedIt": "Remembered it?",
       "backToSignIn": "Back to sign in"
+    },
+    "verifyEmail": {
+      "verifying": "Verifying your email…",
+      "successHeading": "Email verified!",
+      "successDescription": "Your email has been verified. You can now use all features of MediTrack.",
+      "successAction": "Go to dashboard",
+      "errorHeading": "Verification failed",
+      "errorDescription": "This verification link is invalid or has already been used.",
+      "resend": "Resend verification email",
+      "resending": "Sending…",
+      "resendSuccess": "Verification email sent",
+      "invalidLink": "This verification link is invalid or has expired.",
+      "requestNew": "Resend a new one"
     },
     "resetPassword": {
       "heading": "Set a new password",
@@ -237,6 +253,7 @@
   "reports": {
     "heading": "My Reports",
     "uploadButton": "Upload",
+    "searchPlaceholder": "Search by title, doctor or notes…",
     "filterByType": "Filter by report type",
     "sortOrder": "Sort order",
     "reportsPerPage": "Reports per page",
@@ -324,12 +341,29 @@
     "noInactiveDescription": "Links that have expired or been revoked will appear here.",
     "copied": "Link copied to clipboard",
     "copyLink": "Copy link",
+    "accessCode": "Access code",
+    "copyCode": "Copy access code",
+    "codeCopied": "Access code copied",
+    "sendByEmail": "Send via email",
+    "sendEmail": {
+      "heading": "Send by email",
+      "description": "We'll send the link and access code to the recipient.",
+      "emailField": "Recipient's email",
+      "emailPlaceholder": "doctor@hospital.com",
+      "cancel": "Cancel",
+      "submit": "Send",
+      "sending": "Sending…",
+      "success": "Email sent"
+    },
     "statusActive": "Active",
     "statusRevoked": "Revoked",
     "statusExpired": "Expired",
     "expiredOn": "Expired {{date}}",
     "expiresOn": "Expires {{date}}",
     "reportsAndExpiry": "{{reports}} · {{expiry}}",
+    "viewCount_one": "Viewed {{count}} time",
+    "viewCount_other": "Viewed {{count}} times",
+    "viewCountNever": "Not viewed yet",
     "revokeButton": "Revoke",
     "reactivate": "Reactivate",
     "create": {
@@ -376,7 +410,13 @@
       "expiresAt": "Link expires {{datetime}}",
       "noReports": "No reports are included in this link.",
       "noReportsFiltered": "No reports match your filters.",
-      "unavailableHeading": "This link is no longer available"
+      "unavailableHeading": "This link is no longer available",
+      "enterCode": "Enter access code",
+      "enterCodeDescription": "This link is protected. Enter the access code to view the shared reports.",
+      "codeLabel": "Access code",
+      "codePlaceholder": "e.g. A3F7C2",
+      "viewReports": "View reports",
+      "verifying": "Verifying…"
     }
   }
 }

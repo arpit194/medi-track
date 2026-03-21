@@ -1,5 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
-import type { TFunction } from 'i18next'
+import type { TFunction, ParseKeys } from 'i18next'
+
+type NavKey = ParseKeys
 import {
   LayoutDashboardIcon,
   FolderOpenIcon,
@@ -8,12 +10,12 @@ import {
 } from 'lucide-react'
 
 export type NavSubItem = {
-  labelKey: string
+  labelKey: NavKey
   to: string
 }
 
 export type NavItem = {
-  labelKey: string
+  labelKey: NavKey
   icon: LucideIcon
   to: string
   children?: NavSubItem[]
@@ -61,8 +63,8 @@ export const PAGE_TITLE_KEYS: Record<string, string> = {
   '/share/new': 'pageTitle.newShareLink',
 }
 
-export function getPageTitleKey(pathname: string): string {
-  if (PAGE_TITLE_KEYS[pathname]) return PAGE_TITLE_KEYS[pathname]
+export function getPageTitleKey(pathname: string): NavKey {
+  if (PAGE_TITLE_KEYS[pathname]) return PAGE_TITLE_KEYS[pathname] as NavKey
   if (pathname.startsWith('/reports/') && pathname.endsWith('/edit')) return 'pageTitle.editReport'
   if (pathname.startsWith('/reports/')) return 'pageTitle.report'
   return 'common.appName'

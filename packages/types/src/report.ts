@@ -58,6 +58,7 @@ export type ListReportsQuery = {
   page?: number
   limit?: number
   type?: string
+  search?: string
   dateFrom?: string
   dateTo?: string
   sortOrder?: 'asc' | 'desc'

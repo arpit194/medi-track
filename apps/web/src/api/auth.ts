@@ -22,6 +22,14 @@ export async function resetPassword(input: ResetPasswordInput): Promise<void> {
   await client.post('/auth/reset-password', input)
 }
 
+export async function verifyEmail(token: string): Promise<void> {
+  await client.get(`/auth/verify-email?token=${encodeURIComponent(token)}`)
+}
+
+export async function resendVerificationEmail(): Promise<void> {
+  await client.post('/auth/resend-verification')
+}
+
 export async function logout(): Promise<void> {
   await client.post('/auth/logout')
 }

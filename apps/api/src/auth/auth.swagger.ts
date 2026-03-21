@@ -98,6 +98,21 @@ export function ApiForgotPassword() {
   )
 }
 
+export function ApiVerifyEmail() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Verify email address using a token from the verification email' }),
+    ApiNoContentResponse({ description: 'Email verified successfully.' }),
+    ApiBadRequestResponse({ description: 'Invalid or expired verification token.' }),
+  )
+}
+
+export function ApiResendVerificationEmail() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Resend the email verification link to the current user' }),
+    ApiNoContentResponse({ description: 'Verification email sent.' }),
+  )
+}
+
 export function ApiResetPassword() {
   return applyDecorators(
     ApiOperation({ summary: 'Reset password using a token from the reset email' }),

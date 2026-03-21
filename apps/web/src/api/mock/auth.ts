@@ -9,6 +9,7 @@ const MOCK_USER_BASE = {
   gender: null,
   role: 'patient' as const,
   isOnboarded: false,
+  emailVerifiedAt: new Date().toISOString(),
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   lastLoginAt: null,
@@ -51,6 +52,14 @@ export async function resetPassword(input: ResetPasswordInput): Promise<void> {
   if (input.token === 'error-token') {
     throw new Error('This reset link is invalid or has expired. Please request a new one.')
   }
+}
+
+export async function verifyEmail(_token: string): Promise<void> {
+  await delay()
+}
+
+export async function resendVerificationEmail(): Promise<void> {
+  await delay()
 }
 
 export async function logout(): Promise<void> {

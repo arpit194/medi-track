@@ -34,6 +34,20 @@ export function useResetPasswordMutation() {
   return useMutation({ mutationFn: api.auth.resetPassword })
 }
 
+export function useVerifyEmailMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: api.auth.verifyEmail,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: userKeys.current() })
+    },
+  })
+}
+
+export function useResendVerificationMutation() {
+  return useMutation({ mutationFn: api.auth.resendVerificationEmail })
+}
+
 export function useSignoutMutation() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
